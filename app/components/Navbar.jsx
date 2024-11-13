@@ -65,7 +65,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="text-white absolute top-1/2 left-4 transform -translate-y-1/2 bg-[#0A1931] w-max h-max px-2 rounded-[25px] flex flex-col items-center shadow-[0px_0px_10px_4px_#11121374] justify-center">
+    <nav className="text-white relative left-4 bg-[#0A1931] h-max px-2 rounded-[25px] flex flex-col items-center shadow-[0px_0px_10px_4px_#11121374] justify-center">
       <button
         className="Home  flex flex-col items-center justify-center text-white p-[0px] m-[20px_0_5px_0] w-[60px] h-[60px] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
         onClick={backHome}

@@ -8,30 +8,32 @@ import RegisterButton from "../components/RegisterButton";
 
 export default function Home() {
   return (
-    <>
+    <div className="flex flex-col">
       <div
-        className="bg-cover bg-center h-screen flex flex-col"
+        className="bg-cover bg-center w-full h-screen flex flex-col absolute top-0 z-0"
         style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
       >
-        <header>
-          <Headlogo />
-          <Navbar />
-        </header>
-        <div className="absolute top-0 right-0 p-4">
-          <RegisterButton />
-        </div>
-        <Datetime />
-        <div className="flex flex-col justify-center items-center">
-          <div className="relative">
-            <div className="w-60"></div>
+      </div>
+
+      <header className="z-10 flex relative w-full justify-between px-5">
+        <Headlogo className="z-10" />
+        <RegisterButton />
+      </header>
+      
+      <div className="relative top-0 right-0 p-4 flex">
+        <Navbar />
+
+        <div className="container flex w-full relative">
+          <Datetime />
+          <div className="flex flex-col justify-center items-center">
+
           </div>
-        </div>
-        <div className="py-8">
-          <div className="container">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:gid-cols-4 gap-8">
-              {/* today weather */}
-              {/* <div className="py-10 p-5 bg-white rounded-[25px] relative h-[400px] flex items-start ">
-                <div>
+          <div className="py-8">
+            <div className="container">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:gid-cols-4 gap-8">
+                today weather
+                <div className="py-10 p-5 bg-white rounded-[25px] relative h-[400px] flex items-start ">
+
                   <div className="mb-4">
                     <p className="font-bold text-[42px]">วันนี้</p>
                     <p>อ.12</p>
@@ -45,26 +47,18 @@ export default function Home() {
                       ควรดื่มน้ำอย่างเพียงพอเพื่อลดความเสี่ยงจากสภาพอากาศที่แห้ง
                     </p>
                   </div>
-                </div>
-              </div> */}
-              {/* other's day weather */}
-              <div></div>
-            </div>
-          </div>
-          <div></div>
-        </div>
 
-        <div className="grid grid-row-2 ">
-          <h3 className="text-xl absolute top-7 right-2 font-bold">
-            ประเทศไทย
-          </h3>
-          <div className=" absolute  top-20 right-2 w-[500px] h-full max-h-[700px] border"></div>
+                </div>
+                other's day weather
+
+              </div>
+            </div>
+
+          </div>
         </div>
-        <div></div>
-        <footer className="mt-auto">
-          <Footer />
-        </footer>
       </div>
-    </>
+
+      <Footer />
+    </div>
   );
 }
