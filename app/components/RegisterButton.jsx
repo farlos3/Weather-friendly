@@ -14,15 +14,15 @@ export default function RegisterButton() {
   };
 
   return (
-    <div className="flex space-x-2">
+    <div className="flex space-x-2 z-10 items-center flex justify-end">
       <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded h-10"
         onClick={handleLogin}
       >
         Login
       </button>
       <button
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-8 rounded h-10"
         onClick={handleSignup}
       >
         Sign Up
