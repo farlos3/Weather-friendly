@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 export default function RegisterPage() {
+  
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white p-8 rounded shadow-md w-80">

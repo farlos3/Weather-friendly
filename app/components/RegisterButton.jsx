@@ -6,11 +6,11 @@ export default function RegisterButton() {
   const router = useRouter();
 
   const handleLogin = () => {
-    router.push("/Backend/registerPage/login");
+    router.push("/Auth/login");
   };
 
   const handleSignup = () => {
-    router.push("/Backend/registerPage/signup");
+    router.push("/Auth/signup");
   };
 
   return (

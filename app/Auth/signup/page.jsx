@@ -1,7 +1,51 @@
-import React from 'react';
+'use client'
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 
 export default function RegisterPage(){
+
+  const [ name, setName ] = useState('');
+  const [ email, setEmail ] = useState('');
+  const [ password, setPassword ] = useState('');
+  const [ confirmPassword, setConfirmPassword ] = useState('');
+  const [ error, setError ] = useState('');
+
+  async function handleSubmit(event){
+    event.preventDefault();
+
+    if (password != confirmPassword){
+      setError("Password do not match!");
+    }
+
+    if (!name || !email || !password || !confirmPassword){
+      setError("Please complete all inputs!");
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name, email, password
+        })
+      })
+
+      if (res.ok) {
+        const form = event.target;
+        setError("");
+        form.reset();
+      } else {
+        console.log("User registration failed.")
+      }
+
+    } catch(error) {
+      console.log("Error during registration: ", error);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="container mx-auto px-4 py-12">
@@ -10,7 +54,12 @@ export default function RegisterPage(){
             Create Your Account
           </h3>
           <hr className="mb-6 border-gray-200" />
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
+
+            {error && (
+              <div className='bg-red-500 border border-red-600 rounded-lg px-3 p-2 flex items-center space-x-3 text-white'>{error}</div>
+            )}
+
             <div className="space-y-2">
               <label
                 htmlFor="name"
@@ -18,7 +67,7 @@ export default function RegisterPage(){
               >
                 Name
               </label>
-              <input
+              <input onChange={(event => setName(event.target.value))}
                 id="name"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400"
                 type="text"
@@ -33,7 +82,7 @@ export default function RegisterPage(){
               >
                 Email
               </label>
-              <input
+              <input onChange={(event => setEmail(event.target.value))}
                 id="email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400"
                 type="email"
@@ -48,7 +97,7 @@ export default function RegisterPage(){
               >
                 Password
               </label>
-              <input
+              <input onChange={(event => setPassword(event.target.value))}
                 id="password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400"
                 type="password"
@@ -63,7 +112,7 @@ export default function RegisterPage(){
               >
                 Confirm Password
               </label>
-              <input
+              <input onChange={(event => setConfirmPassword(event.target.value))}
                 id="confirm-password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400"
                 type="password"
