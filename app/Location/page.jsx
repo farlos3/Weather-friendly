@@ -7,50 +7,46 @@ import "/app/globals.css";
 
 export default function page() {
   return (
-    <div className="flex min-h-screen bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
+    <main className="flex min-h-screen bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
       
-      <div className="flex flex-col w-full">
+      <section className="flex flex-col w-full ">
         
         <header>
           <Headlogo />
           <Navbar />
         </header>
 
-        <div className="text-start ml-24 pl-12"> 
+        <section className="text-start ml-24 pl-12"> 
           <h1 className="text-4xl font-semibold">ตำแหน่งของฉัน</h1>
             <p className="text-sm text-lg pt-4 ">
               เลือกตำแหน่งของคุณ เพื่อรับข้อมูลสภาพอากาศที่แม่นยำและคำแนะนำด้านสุขภาพในพื้นที่ของคุณ
             </p>
-        </div>
+        </section>
 
 
-        <div className="flex justify-center items-center mt-8">
-          <div className="rounded-lg w-11/12 max-w-4xl p-4 text-black">
-            <div className="border-2 border-4 border border-black relative h-96 rounded-lg overflow-hidden">
-              {/* ตัวอย่างพื้นที่สำหรับแผนที่ */}
-              <img src="/map-placeholder.png" alt="Map" className="w-full h-full object-cover" />
+        <section className="flex justify-center items-center mt-8">
+          <section className="rounded-lg w-11/12 max-w-4xl p-4 text-black">
+            <div className="border-2 border-4 border border-black h-96 rounded-lg overflow-hidden">
 
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-md text-center ">
-                <p className="font-semibold text-lg">เลือกตำแหน่งของคุณ</p>
-                <button className="mt-2 bg-yellow-400 px-4 py-2 rounded-lg text-white font-semibold text-sm">
-                  
-                  ค้นหาตำแหน่งปัจจุบัน
-                </button>
-              </div>
+              {/* แผนที่ */}
+            
             </div>
 
-            <div className="flex justify-center mt-4">
-              <button className="bg-[#0A1931] px-6 py-3 rounded-full text-white font-semibold">
+            <section className="flex justify-center mt-4">
+               <button className="flex items-center bg-[#0A1931] px-4 py-3 rounded-full text-white font-semibold">
+                <div className="flex items-center justify-center bg-white rounded-full h-8 w-8 mr-2">
+                  <img src="/img/location Icon.png" alt="icon_location" className="h-4 w-4" />
+                </div>
                 ดูข้อมูลสภาพอากาศ
               </button>
-            </div>
-          </div>
-        </div>
+            </section>
+          </section>
+        </section>
 
         <footer className="mt-auto text-black">
           <Footer />
         </footer>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
