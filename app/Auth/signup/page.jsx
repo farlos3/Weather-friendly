@@ -10,6 +10,7 @@ export default function RegisterPage(){
   const [ password, setPassword ] = useState('');
   const [ confirmPassword, setConfirmPassword ] = useState('');
   const [ error, setError ] = useState('');
+  const [ success, setSuccess ] = useState('');
 
   async function handleSubmit(event){
     event.preventDefault();
@@ -23,6 +24,21 @@ export default function RegisterPage(){
     }
 
     try {
+
+      const resCheckUser = await fetch("http://localhost:3000/api/checkUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({email})
+      })
+
+      const { user } = await resCheckUser.json();
+      if (user){
+        setError("User already exists!");
+        return;
+      }
+
       const res = await fetch("http://localhost:3000/api/auth/signup", {
         method: "POST",
         headers: {
@@ -36,6 +52,7 @@ export default function RegisterPage(){
       if (res.ok) {
         const form = event.target;
         setError("");
+        setSuccess("User registeration successfully!")
         form.reset();
       } else {
         console.log("User registration failed.")
@@ -58,6 +75,10 @@ export default function RegisterPage(){
 
             {error && (
               <div className='bg-red-500 border border-red-600 rounded-lg px-3 p-2 flex items-center space-x-3 text-white'>{error}</div>
+            )}
+
+            {success && (
+              <div className='bg-green-500 border border-green-600 rounded-lg px-3 p-2 flex items-center space-x-3 text-white'>{success}</div>
             )}
 
             <div className="space-y-2">
