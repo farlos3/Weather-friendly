@@ -17,8 +17,8 @@ export default function page() {
         </header>
 
         <section className="text-start ml-24 pl-12"> 
-          <h1 className="text-4xl font-semibold">ตำแหน่งของฉัน</h1>
-            <p className="text-sm text-lg pt-4 ">
+          <h1 className="text-5xl font-semibold">ตำแหน่งของฉัน</h1>
+            <p className="text-3xl text-lg pt-4 ">
               เลือกตำแหน่งของคุณ เพื่อรับข้อมูลสภาพอากาศที่แม่นยำและคำแนะนำด้านสุขภาพในพื้นที่ของคุณ
             </p>
         </section>
@@ -37,7 +37,7 @@ export default function page() {
                 <div className="flex items-center justify-center bg-white rounded-full h-8 w-8 mr-2">
                   <img src="/img/location Icon.png" alt="icon_location" className="h-4 w-4" />
                 </div>
-                ดูข้อมูลสภาพอากาศ
+                ตำแหน่งปัจจุบัน
               </button>
             </section>
           </section>
