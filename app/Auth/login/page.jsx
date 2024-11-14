@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export default function RegisterPage() {
 
   const userRef = useRef();
-  const errRef = useRef();
+  // const errRef = useRef();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -26,14 +26,44 @@ export default function RegisterPage() {
     setError('');
   }, [email, password])
 
-  async function handleSubmit(event){
+  async function handleSubmit(event) {
     event.preventDefault();
-    console.log(email, password)
-    setEmail('');
-    setPassword('');
-    setSuccess("Login successful!");
 
-    router.push(redirectTo);
+    if (!email || !password) {
+      setError("Please complete all inputs!");
+      return; // หยุดการทำงานถ้าข้อมูลไม่ครบถ้วน
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/backend/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setError('');
+        setSuccess("Login successful!");
+        console.log(data);
+        setTimeout(() => {
+          router.push(redirectTo);
+        }, 500);
+        setEmail('');
+        setPassword('');
+      } else {
+        const errorData = await res.json();
+        setError(errorData.message || "Login failed.");
+      }
+    } catch (error) {
+      setError("Error during login. Please try again.");
+      console.log("Error during login: ", error);
+    }
   }
   
   return (

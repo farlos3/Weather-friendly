@@ -23,14 +23,16 @@ export default function RegisterPage() {
 
     if (password != confirmPassword) {
       setError("Password do not match!");
+      return;
     }
 
     if (!name || !email || !password || !confirmPassword) {
       setError("Please complete all inputs!");
+      return;
     }
 
     try {
-      const resCheckUser = await fetch("http://localhost:3000/api/checkUser", {
+      const resCheckUser = await fetch("http://localhost:3000/backend/api/checkUser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +46,7 @@ export default function RegisterPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:3000/api/auth/signup", {
+      const res = await fetch("http://localhost:3000/backend/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,13 +61,13 @@ export default function RegisterPage() {
       if (res.ok) {
         const form = event.target;
         setError("");
-        setSuccess("User registeration successfully!");
+        setSuccess("User registeration successfully!✅");
         setTimeout(() => {
           router.push(redirectTo);
         }, 500);
         form.reset();
       } else {
-        console.log("User registration failed.");
+        console.log("User registration failed.💥");
       }
     } catch (error) {
       setError("Error during registration. Please try again.");

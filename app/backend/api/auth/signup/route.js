@@ -8,7 +8,7 @@ export async function POST(request) {
         const { name, email, password } = await request.json();
         const modifiedPassword = '123' + password + "456";
         const salt = await bcryptjs.genSalt(10);
-        const hashedPassword = await bcryptjs.hash(password, salt);
+        const hashedPassword = await bcryptjs.hash(modifiedPassword, salt);
 
         await connectMongoDB();
         await User.create(({ name, email, password: hashedPassword }));
@@ -17,10 +17,9 @@ export async function POST(request) {
         console.log('Email: ', email);
         console.log('Password: ', hashedPassword);
 
-        return NextResponse.json({ message: "User registered."}, { status: 201 });
+        return NextResponse.json({ message: "User registered.✅"}, { status: 201 });
         
     } catch(error) {
-        console.log("Error during registration:", error);
         return NextResponse.json({ message: "An error occurred during registration. Please try again."}, { status: 500 });
     }
 }
