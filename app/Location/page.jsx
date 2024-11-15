@@ -3,6 +3,7 @@
 import Navbar from "../components/Navbar";
 import Headlogo from "../components/Headlogo";
 import Footer from "../components/Footer";
+import RegisterButton from "../components/RegisterButton";
 import "/app/globals.css"; 
 
 export default function page() {
@@ -15,6 +16,10 @@ export default function page() {
           <Headlogo />
           <Navbar />
         </header>
+
+        <div className="absolute top-0 right-0 p-4">
+          <RegisterButton />
+        </div>
 
         <section className="text-start ml-24 pl-12"> 
           <h1 className="text-5xl font-semibold">ตำแหน่งของฉัน</h1>
