@@ -6,7 +6,6 @@ import bcryptjs from 'bcryptjs';
 export async function POST(request) {
     try {
         const { email, password } = await request.json();
-
         await connectMongoDB();
 
         const user = await User.findOne({ email });
@@ -16,13 +15,10 @@ export async function POST(request) {
             return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
         }
 
-        // คุณอาจต้องการสร้าง JWT token หรือ session ที่นี่เพื่อนำไปใช้ใน authentication
-        // const secret = process.env.JWT_SECRET
-
         console.log("Login successful!✅")
 
         return NextResponse.json({ message: "Login successful." }, { status: 200 });
-        
+
     } catch (error) {
         return NextResponse.json({ message: "An error occurred during login. Please try again." }, { status: 500 });
     }
