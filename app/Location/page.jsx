@@ -44,6 +44,7 @@ export default function page() {
                 </div>
                 ตำแหน่งปัจจุบัน
               </button>
+              {/* กดปุ่มแล้วจะมีป้อปอัพล้อคอินขึ้น และต้องสร้างอีกหน้าสำหรับล้อคอินแล้ว */}
             </section>
           </section>
         </section>
