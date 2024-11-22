@@ -3,55 +3,63 @@
 import Navbar from "../components/Navbar";
 import Headlogo from "../components/Headlogo";
 import Footer from "../components/Footer";
-import "/app/globals.css"; 
+import RegisterButton from "../components/RegisterButton";
+import "/app/globals.css";
 
-export default function page() {
+export default function Page() {
   return (
-    <div className="flex min-h-screen bg-gradient-to-b from-[#0A144A] to-[#1A294E] text-white">
-      {/* Sidebar */}
-      <Navbar />
-
-      {/* Main Content */}
-      <div className="flex flex-col w-full">
-        
-        <header className="flex items-center justify-between p-4">
+    <main className="flex min-h-screen bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
+      <section className="flex flex-col w-full">
+        {/* Header */}
+        <header>
           <Headlogo />
+          <Navbar />
         </header>
 
-        
-        <div className="text-center mt-8">
-          <h1 className="text-3xl font-semibold">ตำแหน่งของฉัน</h1>
-          <p className="text-sm mt-2">
-            เลือกตำแหน่งของคุณ เพื่อรับข้อมูลสภาพอากาศที่แม่นยำและคำแนะนำด้านสุขภาพในพื้นที่ของคุณ
-          </p>
+        {/* Register Button */}
+        <div className="absolute top-4 right-4">
+          <RegisterButton />
         </div>
 
-        <div className="flex justify-center items-center mt-8">
-          <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-3xl p-4 text-black">
-            <div className="relative h-96 bg-gray-200 rounded-lg overflow-hidden">
-              {/* ตัวอย่างพื้นที่สำหรับแผนที่ */}
-              <img src="/map-placeholder.png" alt="Map" className="w-full h-full object-cover" />
+        {/* Title Section */}
+        <section className="text-start px-6 md:px-12 lg:px-24">
+          <h1 className="text-3xl md:text-5xl font-semibold">ตำแหน่งของฉัน</h1>
+          <p className="text-base md:text-lg pt-4">
+            เลือกตำแหน่งของคุณ เพื่อรับข้อมูลสภาพอากาศที่แม่นยำและคำแนะนำด้านสุขภาพในพื้นที่ของคุณ
+          </p>
+        </section>
 
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-md text-center">
-                <p className="font-medium">เลือกตำแหน่งของคุณ</p>
-                <button className="mt-2 bg-yellow-400 px-4 py-2 rounded-full text-white font-semibold">
-                  ค้นหาตำแหน่งปัจจุบัน
-                </button>
+        {/* Map Section */}
+        <section className="flex justify-center items-center mt-8">
+          <div className="rounded-lg w-11/12 max-w-4xl p-4 text-black">
+            <div className="border-4 border-black h-[24rem] md:h-[30rem] rounded-lg overflow-hidden bg-gray-300">
+              {/* Placeholder สำหรับแผนที่ */}
+              <div className="flex items-center justify-center w-full h-full text-gray-500">
+                <p>แผนที่กำลังโหลด...</p>
               </div>
             </div>
 
-            <div className="flex justify-center mt-4">
-              <button className="bg-[#2C3E75] px-6 py-3 rounded-lg text-white font-semibold">
-                ดูข้อมูลสภาพอากาศ
+            {/* Current Location Button */}
+            <section className="flex justify-center mt-6">
+              <button className="flex items-center bg-[#0A1931] px-6 py-3 rounded-full text-white font-semibold shadow-md hover:bg-[#123a65]">
+                <div className="flex items-center justify-center bg-white rounded-full h-8 w-8 mr-2">
+                  <img
+                    src="/img/location Icon.png"
+                    alt="icon_location"
+                    className="h-4 w-4"
+                  />
+                </div>
+                ตำแหน่งปัจจุบัน
               </button>
-            </div>
+            </section>
           </div>
-        </div>
+        </section>
 
-        <div className="mt-auto">
+        {/* Footer */}
+        <footer className="mt-auto text-black">
           <Footer />
-        </div>
-      </div>
-    </div>
+        </footer>
+      </section>
+    </main>
   );
 }
