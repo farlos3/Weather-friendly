@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const [ error, setError ] = useState('');
   const [ success, setSuccess ] = useState('');
 
-  const redirectTo = searchParams.get('striaght') || '/'; // หน้า default กรณีไม่มี redirect
+  const redirectTo = searchParams.get('redirect') || '/'; // หน้า default กรณีไม่มี redirect
 
   useEffect(() => {
     userRef.current.focus();
