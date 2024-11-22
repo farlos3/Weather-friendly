@@ -47,7 +47,6 @@ export default function page() {
             </div>
           </div>
         </div>
-
         <div className="mt-auto">
           <Footer />
         </div>
