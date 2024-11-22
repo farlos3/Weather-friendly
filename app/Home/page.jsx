@@ -6,13 +6,13 @@ import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import RegisterButton from "../components/RegisterButton";
-import Map from "../components/Map";
-import useWeatherData from "../API/weather"; // ใช้ custom hook สำหรับดึงข้อมูล
 
 export default function Home() {
+
+
   return (
     <div
-      className="bg-cover bg-center w-full h-screen flex flex-col absolute top-0 z-0"
+      className="bg-cover bg-center w-full h-screen flex flex-col"
       style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
     >
       <div className="flex justify-between border items-center">
@@ -26,7 +26,7 @@ export default function Home() {
             <Datetime />
             <div className="mt-[2rem] mb-[2rem] w-[20rem] h-[3rem] border"></div>
             <div className="flex border-4 border-indigo-500/100 gap-4">
-              <div className="w-[60%] border">8b8b8</div>
+              <div className="w-[60%] border">ใช้แสดง API</div>
               <div className="border-4 border-indigo-500/100 flex flex-wrap justify-center ml-[0rem] gap-x-[2rem] gap-y-[2rem] ">
                 <div className="border-4 border-indigo-500/100 w-[10rem] h-[10rem]"></div>
                 <div className="border-4 border-indigo-500/100 w-[10rem] h-[10rem]"></div>
