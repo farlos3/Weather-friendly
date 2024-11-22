@@ -26,24 +26,15 @@ export default function RegisterPage() {
     setError('');
   }, [email, password])
 
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!email || !password) {
-      setError("Please complete all inputs!");
-      return; // หยุดการทำงานถ้าข้อมูลไม่ครบถ้วน
-    }
-
     try {
-      const res = await fetch("http://localhost:3000/backend/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/AuthRoutes/api/auth/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
       if (res.ok) {
@@ -66,26 +57,14 @@ export default function RegisterPage() {
     }
   }
 
-  // ฟังก์ชันสำหรับล็อกอินผ่าน Google
-  async function handleGoogleLogin() {
-    try {
-      const res = await fetch("http://localhost:3000/backend/api/auth/google", {
-        method: "GET",
-        credentials: "include", // ใช้เพื่อจัดการ cookie
-      });
-      
-      if (res.ok) {
-        setSuccess("Login with Google successful!");
-        setTimeout(() => {
-          router.push(redirectTo);
-        }, 500);
-      } else {
-        setError("Google login failed.");
-      }
-    } catch (error) {
-      setError("Error during Google login. Please try again.");
-    }
-  }
+  // async function handleGoogleLogin() {
+  //   try {
+  //     // Redirect ผู้ใช้ไปยัง Endpoint ของ Google OAuth
+  //     window.location.href = `${API_BASE_URL}/AuthRoutes/api/auth/google`;
+  //   } catch (error) {
+  //     setError("Error during Google login. Please try again.");
+  //   }
+  // }  
   
   return (
     <div className="flex justify-center items-center h-screen">
@@ -128,13 +107,13 @@ export default function RegisterPage() {
             />
           </div>
           <div className="space-y-4">
-            <button
+            {/* <button
               onClick={handleGoogleLogin}
               type="submit"
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
             >
               Login with Google
-            </button>
+            </button> */}
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"

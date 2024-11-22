@@ -32,7 +32,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const resCheckUser = await fetch("http://localhost:3000/backend/api/checkUser", {
+      const resCheckUser = await fetch("http://localhost:3000/AuthRoutes/api/checkUser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export default function RegisterPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:3000/backend/api/auth/signup", {
+      const res = await fetch("http://localhost:3000/AuthRoutes/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
