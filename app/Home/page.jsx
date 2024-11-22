@@ -24,10 +24,10 @@ export default function Home() {
         <div className="flex justify-between border w-full max-[100%]">
           <div className="ml-10 w-full max-[100%]">
             <Datetime />
-            <div className="mt-[2rem] mb-[2rem] w-[20rem] h-[3rem] border"></div>
+            <div className="mt-[1rem] mb-[1rem] w-[15rem] h-[2rem] border"></div>
             <div className="flex border-4 border-indigo-500/100 gap-4">
               <div className="w-[60%] border">ใช้แสดง API</div>
-              <div className="border-4 border-indigo-500/100 flex flex-wrap justify-center ml-[0rem] gap-x-[2rem] gap-y-[2rem] ">
+              <div className="border-4 border-indigo-500/100 flex flex-wrap justify-center ml-[0rem] gap-x-[2rem] gap-y-[1rem] ">
                 <div className="border-4 border-indigo-500/100 w-[10rem] h-[10rem]"></div>
                 <div className="border-4 border-indigo-500/100 w-[10rem] h-[10rem]"></div>
                 <div className="border-4 border-indigo-500/100 w-[10rem] h-[10rem]"></div>
@@ -38,9 +38,9 @@ export default function Home() {
             </div>
             <div className="mt-[2rem] nb-[2rem] w-full h-[20%] border"></div>
           </div>
-          <div className="flex flex-col items-end border w-[50%]">
-            <h3 className="text-[2rem] font-bold">ประเทศไทย</h3>
-            <div className="border"></div>
+          <div className="flex flex-col items-end border w-[50%] mr-[1rem]">
+            <h3 className="text-[2rem] mr-[1rem] font-bold">ประเทศไทย</h3>
+            แผนที่
           </div>
         </div>
       </div>
