@@ -13,13 +13,12 @@ export default function Home() {
         className="bg-cover bg-center h-screen flex flex-col"
         style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
       >
-        <header>
+        <div className="flex justify-between border items-center">
           <Headlogo />
           <Navbar />
-        </header>
-        <div className="absolute top-0 right-0 p-4">
           <RegisterButton />
         </div>
+        
         <Datetime />
         <div className="flex flex-col justify-center items-center">
           <div className="relative">

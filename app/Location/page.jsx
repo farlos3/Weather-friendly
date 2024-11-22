@@ -10,9 +10,9 @@ export default function page() {
   return (
     <main className="flex min-h-screen bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
       <section className="flex flex-col w-full ">
-
-        <header className="flex justify-between border items-center">
+        <header className="flex justify-between  items-center">
           <Headlogo />
+          <Navbar />
           <RegisterButton />
         </header>
 
