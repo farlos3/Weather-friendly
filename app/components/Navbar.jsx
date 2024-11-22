@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-
 import Info from "/public/img/Info_alt_light.png";
 import Home from "/public/img/Frame 55.png";
 import HomeHover from "/public/img/Frame 58.png";
@@ -15,93 +13,166 @@ import AirQ from "/public/img/blizzard2.png";
 import AirQhover from "/public/img/blizzard.png";
 import Health from "/public/img/Vector.png";
 import Healthhover from "/public/img/Vector2.png";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const router = useRouter();
 
-  const images = {
-    home: { default: Home, hover: HomeHover },
-    location: { default: Location, hover: Locationhover },
-    rainfall: { default: Rainfall, hover: Rainfallhover },
-    airQ: { default: AirQ, hover: AirQhover },
-    health: { default: Health, hover: Healthhover },
-  };
+  const [homeImage, setHomeImage] = useState(Home);
+  const [locationImage, setLocationImage] = useState(Location);
+  const [rainfallImage, setRainfallImage] = useState(Rainfall);
+  const [airQImage, setAirQImage] = useState(AirQ);
+  const [healthImage, setHealthImage] = useState(Health);
+  const [time, setTime] = useState(new Date());
 
-  const [currentImages, setCurrentImages] = useState({
-    home: images.home.default,
-    location: images.location.default,
-    rainfall: images.rainfall.default,
-    airQ: images.airQ.default,
-    health: images.health.default,
-  });
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const handleMouseEnter = (key) => {
-    setCurrentImages((prev) => ({ ...prev, [key]: images[key].hover }));
-  };
+  if (!time) return null; // Render nothing until `time` is available
 
-  const handleMouseLeave = (key) => {
-    setCurrentImages((prev) => ({ ...prev, [key]: images[key].default }));
-  };
+  function handleHomeMouseEnter() {
+    setHomeImage(HomeHover);
+  }
+  function handleHomeMouseLeave() {
+    setHomeImage(Home);
+  }
+  function handleRainfallMouseEnter() {
+    setRainfallImage(Rainfallhover);
+  }
+  function handleRainfallMouseLeave() {
+    setRainfallImage(Rainfall);
+  }
+  function handleLocationMouseEnter() {
+    setLocationImage(Locationhover);
+  }
+  function handleLocationMouseLeave() {
+    setLocationImage(Location);
+  }
+  function handleAirQMouseEnter() {
+    setAirQImage(AirQhover);
+  }
+  function handleAirQMouseLeave() {
+    setAirQImage(AirQ);
+  }
+  function handleHealthMouseEnter() {
+    setHealthImage(Healthhover);
+  }
+  function handleHealthMouseLeave() {
+    setHealthImage(Health);
+  }
 
-  const handleNavigation = (path) => {
-    router.push(path);
-  };
+  function backHome() {
+    router.push("/");
+  }
+
+  function backLocation() {
+    router.push("/Location");
+  }
+
+  function backRainfall() {
+    router.push("/Rainfall");
+  }
+
+  function backAir() {
+    router.push("/Air");
+  }
+
+  function backHealth() {
+    router.push("/Health");
+  }
 
   return (
-    <nav className="text-white absolute top-1/2 left-4 transform -translate-y-1/2 bg-[#0A1931] w-max h-max px-2 rounded-[25px] flex flex-col items-center shadow-[0px_0px_10px_4px_#11121374] justify-center">
-      <button
-        onMouseEnter={() => handleMouseEnter("home")}
-        onMouseLeave={() => handleMouseLeave("home")}
-        onClick={() => handleNavigation("/")}
-        className="flex flex-col items-center justify-center w-[60px] h-[60px] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
-      >
-        <Image src={currentImages.home} alt="Home" width={40} height={40} />
-      </button>
-      <h4 className="text-[10pt] m-[10px_0_5px_0]">หน้าหลัก</h4>
+    <div className="border w-max flex items-center justify-center">
+      <nav className="text-white bg-[#0A1931] px-2 rounded-[2rem] flex flex-col justify-center items-center shadow-[0px_0px_10px_4px_#11121374]">
+        <button
+          className="Home  flex flex-col items-center justify-center text-white mt-[2rem] w-[3rem] h-[3rem] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
+          onClick={backHome}
+          onMouseEnter={handleHomeMouseEnter}
+          onMouseLeave={handleHomeMouseLeave}
+        >
+          <Image
+            src={homeImage}
+            alt="Home"
+            className="w-[2rem] h-[2rem] object-contain flex items-center"
+          />
+        </button>
+        <h4 className="flex flex-col items-center w-max h-max text-[8.5pt]">
+          หน้าหลัก
+        </h4>
+        <button
+          className="Location flex flex-col items-center justify-center  mt-[2rem] w-[3rem] h-[3rem] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
+          onClick={backLocation}
+          onMouseEnter={handleLocationMouseEnter}
+          onMouseLeave={handleLocationMouseLeave}
+        >
+          <Image
+            src={locationImage}
+            alt="Location"
+            className="w-[2rem] h-[2rem] object-contain flex items-center"
+          />
+        </button>
+        <h4 className="flex flex-col items-center w-max h-max text-[8.5pt] ">
+          สถานที่
+        </h4>
 
-      <button
-        onMouseEnter={() => handleMouseEnter("location")}
-        onMouseLeave={() => handleMouseLeave("location")}
-        onClick={() => handleNavigation("/Location")}
-        className="flex flex-col items-center justify-center w-[60px] h-[60px] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
-      >
-        <Image src={currentImages.location} alt="Location" width={40} height={40} />
-      </button>
-      <h4 className="text-[10pt] m-[10px_0_5px_0]">สถานที่</h4>
+        <button
+          className="Rainfall flex flex-col items-center justify-center text-white mt-[2rem]  w-[3rem] h-[3rem] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
+          onClick={backRainfall}
+          onMouseEnter={handleRainfallMouseEnter}
+          onMouseLeave={handleRainfallMouseLeave}
+        >
+          <Image
+            src={rainfallImage}
+            alt="Weather"
+            className="w-[2rem] h-[2rem] object-contain flex items-center"
+          />
+        </button>
+        <h4 className="flex flex-col items-center w-max h-max text-[8.5pt]">
+          ปริมาณน้ำฝน
+        </h4>
 
-      <button
-        onMouseEnter={() => handleMouseEnter("rainfall")}
-        onMouseLeave={() => handleMouseLeave("rainfall")}
-        onClick={() => handleNavigation("/Rainfall")}
-        className="flex flex-col items-center justify-center w-[60px] h-[60px] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
-      >
-        <Image src={currentImages.rainfall} alt="Rainfall" width={40} height={40} />
-      </button>
-      <h4 className="text-[10pt] m-[10px_0_5px_0]">ปริมาณน้ำฝน</h4>
+        <button
+          className="AirQ flex flex-col items-center justify-center text-white mt-[2rem] w-[3rem] h-[3rem] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
+          onClick={backAir}
+          onMouseEnter={handleAirQMouseEnter}
+          onMouseLeave={handleAirQMouseLeave}
+        >
+          <Image
+            src={airQImage}
+            alt="Air Quality"
+            className="w-[2rem] h-[2rem] object-contain flex items-center"
+          />
+        </button>
+        <h4 className="flex flex-col items-center w-max h-max text-[8.5pt]">
+          คุณภาพอากาศ
+        </h4>
 
-      <button
-        onMouseEnter={() => handleMouseEnter("airQ")}
-        onMouseLeave={() => handleMouseLeave("airQ")}
-        onClick={() => handleNavigation("/Air")}
-        className="flex flex-col items-center justify-center w-[60px] h-[60px] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
-      >
-        <Image src={currentImages.airQ} alt="Air Quality" width={40} height={40} />
-      </button>
-      <h4 className="text-[10pt] m-[10px_0_5px_0]">คุณภาพอากาศ</h4>
+        <button
+          className="Health flex flex-col items-center justify-center text-white mt-[2rem] w-[3rem] h-[3rem] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
+          onClick={backHealth}
+          onMouseEnter={handleHealthMouseEnter}
+          onMouseLeave={handleHealthMouseLeave}
+        >
+          <Image
+            src={healthImage}
+            alt="Health"
+            className="w-[2rem] h-[2rem] object-contain flex items-center"
+          />
+        </button>
+        <h4 className="flex flex-col items-center w-max h-max text-[8.5pt]">
+          สุขภาพ
+        </h4>
 
-      <button
-        onMouseEnter={() => handleMouseEnter("health")}
-        onMouseLeave={() => handleMouseLeave("health")}
-        onClick={() => handleNavigation("/Health")}
-        className="flex flex-col items-center justify-center w-[60px] h-[60px] rounded-full transition-opacity duration-300 ease-in-out hover:bg-white hover:shadow-[0px_0px_15px_2px_#246ada42] hover:text-[#0A1931] hover:opacity-80"
-      >
-        <Image src={currentImages.health} alt="Health" width={40} height={40} />
-      </button>
-      <h4 className="text-[10pt] m-[10px_0_5px_0]">สุขภาพ</h4>
-
-      <button className="rounded-full border-none p-[5px] m-[20px_0_5px_0]">
-        <Image src={Info} alt="Information" width={30} height={30} />
-      </button>
-    </nav>
+        <button className="rounded-full border-none p-[5px] m-[20px_0_5px_0] py-6 px-2">
+          <Image
+            src={Info}
+            alt="Information"
+            className="w-[2rem] h-[2rem] mb-[2rem] object-contain flex items-center"
+          />
+        </button>
+      </nav>
+    </div>
   );
 }

@@ -45,8 +45,8 @@ export default function Datetime() {
   const formattedTime = `${hours}:${minutes < 10 ? "0" + minutes : minutes} น.`;
 
   return (
-    <div className="flex flex-col w-max p-[0px] m-[15px_0_0_150px] text-[20pt] ">
-      <div className="flex items-center text-[32pt] font-bold w-max">{formattedTime}</div>
+    <div className="flex flex-col text-[20pt]">
+      <div className="text-[32pt] font-bold w-max ">{formattedTime}</div>
       <div className="date">
         {day},{date} {month} {year}
       </div>
