@@ -8,24 +8,20 @@ import "/app/globals.css";
 
 export default function Page() {
   return (
-    <main className="flex min-h-screen bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
-      <section className="flex flex-col w-full">
-        {/* Header */}
-        <header>
-          <Headlogo />
-          <Navbar />
-        </header>
-
-        {/* Register Button */}
-        <div className="absolute top-4 right-4">
-          <RegisterButton />
-        </div>
-
+    <main className="bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
+      <div className="flex justify-between border items-center">
+        <Headlogo />
+        <RegisterButton />
+      </div>
+      <div className="flex">
+         <Navbar />
+         <section className="flex flex-col w-full">
         {/* Title Section */}
         <section className="text-start px-6 md:px-12 lg:px-24">
           <h1 className="text-3xl md:text-5xl font-semibold">ตำแหน่งของฉัน</h1>
           <p className="text-base md:text-lg pt-4">
-            เลือกตำแหน่งของคุณ เพื่อรับข้อมูลสภาพอากาศที่แม่นยำและคำแนะนำด้านสุขภาพในพื้นที่ของคุณ
+            เลือกตำแหน่งของคุณ
+            เพื่อรับข้อมูลสภาพอากาศที่แม่นยำและคำแนะนำด้านสุขภาพในพื้นที่ของคุณ
           </p>
         </section>
 
@@ -60,6 +56,8 @@ export default function Page() {
           <Footer />
         </footer>
       </section>
+      </div>
+      
     </main>
   );
 }
