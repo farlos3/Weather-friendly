@@ -27,7 +27,7 @@ export default function page() {
 
           <section className="flex justify-center items-center mt-8">
             <section className="rounded-lg w-11/12 max-w-4xl p-4 text-black">
-              <div className="border-2 border-4 border border-black h-96 rounded-lg ">
+              <div className="border-2 border-4 border border-black h-96 rounded-lg">
                 {/* แผนที่ */}
               </div>
 
