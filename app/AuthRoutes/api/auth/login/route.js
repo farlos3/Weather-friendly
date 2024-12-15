@@ -4,9 +4,9 @@ import User from "@/app/models/user";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export async function POST(request) {
+export async function POST(req) {
     try {
-        const { email, password } = await request.json();
+        const { email, password } = await req.json();
         if (!email || !password) {
             return NextResponse.json({ message: "Email and password are required." }, { status: 400 });
         }
@@ -20,13 +20,16 @@ export async function POST(request) {
         //     return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
         // }
 
-        if (!process.env.SECRET_KEY) {
-            console.error("SECRET_KEY is missing in environment variables");
-            return NextResponse.json(
-                { message: "Server configuration error. Please contact support." },
-                { status: 500 }
-            );
-        }
+        // save user token
+        user.token = token;
+
+        // if (!process.env.SECRET_KEY) {
+        //     console.error("SECRET_KEY is missing in environment variables");
+        //     return NextResponse.json(
+        //         { message: "Server configuration error. Please contact support." },
+        //         { status: 500 }
+        //     );
+        // }
 
         if (user && (await bcryptjs.compare(modifiedPassword, user.password))) {
             const token = jwt.sign(

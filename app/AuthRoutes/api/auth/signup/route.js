@@ -34,7 +34,7 @@ export async function POST(request) {
 
         console.log('Name: ', name);
         console.log('Email: ', email);
-        console.log('Password: ', hashedPassword);
+        console.log('Password: ', hashedPassword, '\n');
 
         // Return user details with the response
         return NextResponse.json({
