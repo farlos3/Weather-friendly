@@ -8,6 +8,7 @@ import RegisterButton from "../components/RegisterButton";
 import "/app/globals.css";
 
 export default function Page() {
+  
   return (
     <div
       className="bg-cover bg-center w-full h-screen flex flex-col"
@@ -63,6 +64,8 @@ export default function Page() {
             <div className="w-3/4 h-2 bg-gradient-to-r from-green-400 via-yellow-300 to-red-500 rounded-full"></div>
             <p>แย่</p>
           </div>
+
+          {/* Search Bar and Dropdown */}
 
           {/* AQI List */}
           <div className="bg-yellow-300 rounded-lg border h-full w-full p-4 space-y-4 ">
