@@ -4,9 +4,9 @@ import User from "@/app/models/user";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export async function POST(req) {
+export async function POST(request) {
     try {
-        const { email, password } = await req.json();
+        const { email, password } = await request.json();
         if (!email || !password) {
             return NextResponse.json({ message: "Email and password are required." }, { status: 400 });
         }
@@ -20,22 +20,20 @@ export async function POST(req) {
         //     return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
         // }
 
-        // save user token
-        user.token = token;
-
-        // if (!process.env.SECRET_KEY) {
-        //     console.error("SECRET_KEY is missing in environment variables");
-        //     return NextResponse.json(
-        //         { message: "Server configuration error. Please contact support." },
-        //         { status: 500 }
-        //     );
-        // }
+        if (!process.env.SECRET_KEY) {
+            console.error("SECRET_KEY is missing in environment variables");
+            return NextResponse.json(
+                { message: "Server configuration error. Please contact support." },
+                { status: 500 }
+            );
+        }
 
         if (user && (await bcryptjs.compare(modifiedPassword, user.password))) {
             const token = jwt.sign(
                 { id: user._id, email: user.email },
-                process.env.SECRET_KEY, 
-                { expiresIn: '1h' });
+                process.env.SECRET_KEY,
+                { expiresIn: '1h' }
+            );
 
             console.log("Generated JWT Token:", token);
 
@@ -51,11 +49,11 @@ export async function POST(req) {
                     name: user.name,
                     email: user.email,
                     token: token
-                    }
-                }, { status: 201 }
-            );
+                }
+            }, { status: 201 });
+        } else {
+            return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
         }
-
     } catch (error) {
         console.error("Error during login:", error.message);
         console.error("Login error:", error);

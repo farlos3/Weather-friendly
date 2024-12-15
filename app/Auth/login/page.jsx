@@ -7,7 +7,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export default function RegisterPage() {
 
   const userRef = useRef();
-  // const errRef = useRef();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -16,7 +15,7 @@ export default function RegisterPage() {
   const [ error, setError ] = useState('');
   const [ success, setSuccess ] = useState('');
 
-  const redirectTo = searchParams.get('redirect') || '/'; // หน้า default กรณีไม่มี redirect
+  const redirectTo = searchParams.get('redirect') || '/'; 
 
   useEffect(() => {
     userRef.current.focus();
@@ -26,22 +25,22 @@ export default function RegisterPage() {
     setError('');
   }, [email, password])
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   async function handleSubmit(event) {
     event.preventDefault();
 
     try {
-      const res = await fetch(`${API_BASE_URL}/AuthRoutes/api/auth/login`, {
+      const res = await fetch("/AuthRoutes/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       if (res.ok) {
-        // const data = await res.json();
+        const data = await res.json();
         setError('');
         setSuccess("Login successful!");
-        // console.log(data);
+        localStorage.setItem("token", data.User.token);
+        localStorage.setItem('token_expiry', new Date().getTime() + 3600000);
         setTimeout(() => {
           router.push(redirectTo);
         }, 500);
@@ -55,16 +54,7 @@ export default function RegisterPage() {
       setError("Error during login. Please try again.");
       console.log("Error during login: ", error);
     }
-  }
-
-  // async function handleGoogleLogin() {
-  //   try {
-  //     // Redirect ผู้ใช้ไปยัง Endpoint ของ Google OAuth
-  //     window.location.href = `${API_BASE_URL}/AuthRoutes/api/auth/google`;
-  //   } catch (error) {
-  //     setError("Error during Google login. Please try again.");
-  //   }
-  // }  
+  } 
   
   return (
     <div className="flex justify-center items-center h-screen">
@@ -107,13 +97,6 @@ export default function RegisterPage() {
             />
           </div>
           <div className="space-y-4">
-            {/* <button
-              onClick={handleGoogleLogin}
-              type="submit"
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
-            >
-              Login with Google
-            </button> */}
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"

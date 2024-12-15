@@ -20,35 +20,35 @@ export async function POST(request) {
         const hashedPassword = await bcryptjs.hash(modifiedPassword, salt);
 
         // Create the new user
-        await User.create({ name, email, password: hashedPassword });
+        const newUser = await User.create({ name, email, password: hashedPassword });
 
         const token = jwt.sign(
-            { id: User._id, email: User.email },
+            { id: newUser._id, email: newUser.email },
             process.env.SECRET_KEY, 
             { 
                 expiresIn: '1h' 
-            });
+            }
+        );
 
-        // save user token
-        User.token = token;
+        // Save user token
+        newUser.token = token;
 
         console.log('Name: ', name);
         console.log('Email: ', email);
-        console.log('Password: ', hashedPassword, '\n');
+        console.log('Password: ', hashedPassword);
 
         // Return user details with the response
         return NextResponse.json({
             message: "User registered.✅",
             User: {
-                id: User._id,
-                name: User.name,
-                email: User.email,
-                // password : User.hashedPassword
+                id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
                 token: token
-                }
-            }, { status: 201 }
-        );
+            }
+        }, { status: 201 });
     } catch (error) {
+        console.error("Error during registration:", error);
         return NextResponse.json({ message: "An error occurred during registration. Please try again." }, { status: 500 });
     }
 }
