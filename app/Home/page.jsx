@@ -121,8 +121,8 @@ export default function Home() {
   return (
     <div
       className="bg-cover bg-center w-full h-screen flex flex-col"
-      style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
-      >
+      style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}>
+        
 {/* ---------------------------- Token and State login  ---------------------------- */}
       <div className="flex justify-between items-center p-4 border-b">
         <Headlogo />
