@@ -11,7 +11,7 @@ import { longdo, map, LongdoMap } from "../components/LongdoMap"; // Adjust path
 import Dropdown from "../components/Dropdown";
 
 export default function Home() {
-  const mapKey = "b8e921b16722e026a1b2d9e532b77706";
+  const mapKey = "b8e921b16722e026a1b2d9e532b77706"; // API key, Should hide in .env
   const mapRef = useRef(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false); // สถานะการโหลดแผนที่
 
