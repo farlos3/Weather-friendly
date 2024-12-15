@@ -10,9 +10,12 @@ export default function RegisterButton() {
   };
 
   return (
-    <div className="flex space-x-2 z-10 items-center flex justify-end border w-max h-max mr-[1rem]">
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded h-10"
+    <div className="flex space-x-2 z-10 items-center justify-end border w-max h-max">
+      <img
+        src="/img/Account-Icon.png"
+        alt="Login"
+        style={{ width: "8%", height: "auto" }}
+        className="cursor-pointer hover:opacity-80"
         onClick={handleLogin}
       />
     </div>

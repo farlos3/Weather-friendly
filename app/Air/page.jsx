@@ -4,20 +4,76 @@ import Navbar from "../components/Navbar";
 import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
-import RegisterButton from "../components/RegisterButton";
 import "/app/globals.css";
 
+{/* ---------------------------- Token and State login  ---------------------------- */}
+import { useEffect, useState } from "react";
+import RegisterButton from "../components/RegisterButton";
+import ProfilePopup from "../components/ProfilePopup";
+import { getToken, setToken, setTokenExpiry, removeToken, removeTokenExpiry, } from "../utils/auth";
+import { useRouter } from "next/navigation";
+{/* ---------------------------- Token and State login  ---------------------------- */}
+
 export default function Page() {
-  
+
+{/* ---------------------------- Set Token  ---------------------------- */}
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      setIsLoggedIn(true);
+      setTokenExpiry();
+    }
+    console.log("token: ", token);
+  }, []);
+
+  const handleLogout = () => {
+    removeToken();
+    console.log("After logout, \ntoken:", getToken());
+
+    setIsLoggedIn(false); // อัปเดตสถานะเป็น Logged out
+    router.push("/");
+  };
+
+  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
+
+  const handleProfileClick = () => {
+    setIsProfilePopupVisible(!isProfilePopupVisible);
+  };
+{/* ---------------------------- Set Token  ---------------------------- */}
+
   return (
     <div
       className="bg-cover bg-center w-full h-screen flex flex-col"
-      style={{ backgroundImage: "url('/img/AirBackground.gif')" }}
-    >
-      <div className="flex justify-between border items-center">
+      style={{ backgroundImage: "url('/img/AirBackground.gif')" }}>
+
+{/* ---------------------------- Token and State login  ---------------------------- */}
+      <div className="flex justify-between items-center p-4 border-b">
         <Headlogo />
-        <RegisterButton />
+        {isLoggedIn ? (
+          <div className="flex items-center space-x-2 relative">
+            <p>Welcome</p>
+            <img
+              src="/img/Account-Icon.png"
+              alt="Profile"
+              className="w-8 h-8 rounded-full cursor-pointer"
+              onClick={handleProfileClick}
+            />
+            <div className="absolute top-full right-0">
+              <ProfilePopup
+                isVisible={isProfilePopupVisible}
+                onClose={() => setIsProfilePopupVisible(false)}
+                onLogout={handleLogout} // ส่งฟังก์ชัน handleLogout ไปที่ ProfilePopup
+              />
+            </div>
+          </div>
+        ) : (
+          <RegisterButton />
+        )}
       </div>
+{/* ---------------------------- Token and State login  ---------------------------- */}
 
       <section className=" border flex h-full w-full max-[100%]">
         <Navbar />
