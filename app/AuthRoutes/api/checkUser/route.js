@@ -11,7 +11,11 @@ export async function POST(request) {
 
         return NextResponse.json({ user });
 
-    } catch(error) {
-        console.log(error);
+    } catch (error) {
+        console.log("Error: ", error);
+        return NextResponse.json(
+            { message: "An error occurred while processing the request.", error: error.message },
+            { status: 500 }
+        );
     }
 }

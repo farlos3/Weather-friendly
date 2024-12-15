@@ -4,9 +4,9 @@ import User from "@/app/models/user";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export async function POST(request) {
+export async function POST(req) {
     try {
-        const { email, password } = await request.json();
+        const { email, password } = await req.json();
         if (!email || !password) {
             return NextResponse.json({ message: "Email and password are required." }, { status: 400 });
         }
@@ -21,36 +21,42 @@ export async function POST(request) {
         }
 
         const token = jwt.sign(
-            { id: user._id, email: user.email }, 
-            process.env.SECRET_KEY, { expiresIn: '1h' });
+            { id: user._id, email: user.email },
+            process.env.SECRET_KEY,
+            {
+                expiresIn: '1h'
+            });
         console.log("Generated JWT Token:", token);
 
-        if (!process.env.SECRET_KEY) {
-            console.error("SECRET_KEY is missing in environment variables");
-            return NextResponse.json(
-                { message: "Server configuration error. Please contact support." },
-                { status: 500 }
-            );
-        }
+        // save user token
+        user.token = token;
 
-        const response = NextResponse.json({ 
+        // if (!process.env.SECRET_KEY) {
+        //     console.error("SECRET_KEY is missing in environment variables");
+        //     return NextResponse.json(
+        //         { message: "Server configuration error. Please contact support." },
+        //         { status: 500 }
+        //     );
+        // }
+
+        const response = NextResponse.json({
             message: "Login successful!✅",
             user: {
                 id: user._id,
                 email: user.email,
                 name: user.name
             }
-        });
-
+        }, { status: 201 }
+    );
         // เก็บ token ใน Cookie แบบ Secure HTTP-only
         // Setting cookie
-        response.cookies.set("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production" || false,
-            sameSite: "strict", 
-            maxAge: 3600,
-            path: '/'
-        });
+        // response.cookies.set("token", token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === "production" || false,
+        //     sameSite: "strict", 
+        //     maxAge: 3600,
+        //     path: '/'
+        // });
 
         console.log("Login successful!✅")
         console.log(`User logged in: ${user.email}\n`);
