@@ -4,26 +4,26 @@ import Discord from "/public/img/Discord.png";
 export default function Footer() {
   return (
     <footer>
-      <div className="bg-[#FFF0E3] text-center pt-2 pb-2 fixed bottom-0 w-full flex flex-row justify-center items-center gap-[90px]">
+      <div className=" flex bg-[#FFF0E3] text-center p-3 w-full h-max items-center justify-around ">
         <p>ติดต่อเราได้ที่</p>
-        <div className="w-[2px] h-[20px] bg-black"></div>
-        <div className="flex items-center">
+        <div className="flex w-[0.2rem] h-[2rem] bg-black"></div>
+        <div className="flex gap-x-4 items-center">
           <Image
             src={Facebook}
             alt="facebook"
-            className="w-[30px] h-[30px] mr-[10px]"
+            className="w-[2rem] h-[2rem] "
           />
           <a href="https://www.google.co.th/?hl=th">Weather Friendly</a>
         </div>
-        <div className="flex items-center">
+        <div className="flex gap-x-4 items-center">
           <Image
             src={Discord}
             alt="discord"
-            className="w-[30px] h-[30px] mr-[10px]"
+            className="w-[2rem] h-[2rem]"
           />
           <a href="https://www.google.co.th/?hl=th">Weather Friendly Commu</a>
         </div>
-        <div className="w-[2px] h-[20px] bg-black"></div>
+        <div className="w-[0.2rem] h-[2rem] bg-black"></div>
         <p>
           <a href="https://www.google.co.th/?hl=th">ความเป็นส่วนตัว</a>
         </p>

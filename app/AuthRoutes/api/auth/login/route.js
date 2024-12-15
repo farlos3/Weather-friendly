@@ -14,16 +14,11 @@ export async function POST(request) {
         await connectMongoDB();
 
         const user = await User.findOne({ email });
-        const modifiedPassword = '123' + password + "456";
-        const isPasswordValid = user ? await bcryptjs.compare(modifiedPassword, user.password) : false;
-        if (!user || !isPasswordValid) {
-            return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
-        }
-
-        const token = jwt.sign(
-            { id: user._id, email: user.email }, 
-            process.env.SECRET_KEY, { expiresIn: '1h' });
-        console.log("Generated JWT Token:", token);
+        const modifiedPassword = '123' + password + "456"; // แปลงรหัสผ่านโดยเพิ่ม prefix และ suffix
+        // const isPasswordValid = user ? await bcryptjs.compare(modifiedPassword, user.password) : false;
+        // if (!user || !isPasswordValid) {
+        //     return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
+        // }
 
         if (!process.env.SECRET_KEY) {
             console.error("SECRET_KEY is missing in environment variables");
@@ -33,29 +28,30 @@ export async function POST(request) {
             );
         }
 
-        const response = NextResponse.json({ 
-            message: "Login successful!✅",
-            user: {
-                id: user._id,
-                email: user.email,
-                name: user.name
-            }
-        });
+        if (user && (await bcryptjs.compare(modifiedPassword, user.password))) {
+            const token = jwt.sign(
+                { id: user._id, email: user.email },
+                process.env.SECRET_KEY, 
+                { expiresIn: '1h' });
 
-        // เก็บ token ใน Cookie แบบ Secure HTTP-only
-        // Setting cookie
-        response.cookies.set("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production" || false,
-            sameSite: "strict", 
-            maxAge: 3600,
-            path: '/'
-        });
+            console.log("Generated JWT Token:", token);
 
-        console.log("Login successful!✅")
-        console.log(`User logged in: ${user.email}\n`);
+            user.token = token;
 
-        return response;
+            console.log("Login successful!✅")
+            console.log(`User logged in: ${user.email}\n`);
+
+            return NextResponse.json({
+                message: "Login successful!✅",
+                User: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    token: token
+                    }
+                }, { status: 201 }
+            );
+        }
 
     } catch (error) {
         console.error("Error during login:", error.message);
