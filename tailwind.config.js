@@ -28,10 +28,10 @@ module.exports = {
         extrabold: 800,
         black: 900,
       },
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-      },
+      dropShadow: {
+        '3xl': '0 35px 35px rgba(0, 0, 0, 0.25)',
+        '2xl': '0px 0px 10px 4px #11121374'
+      }
     },
   },
   plugins: [],

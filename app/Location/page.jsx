@@ -4,9 +4,11 @@ import Navbar from "../components/Navbar";
 import Headlogo from "../components/Headlogo";
 import Footer from "../components/Footer";
 import RegisterButton from "../components/RegisterButton";
+import "/app/globals.css";
+import RegisterButton from "../components/RegisterButton";
 import "/app/globals.css"; 
 
-export default function page() {
+export default function Page() {
   return (
     <main className="flex min-h-screen bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
       <section className="flex flex-col w-full ">
