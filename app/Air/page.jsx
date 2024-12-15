@@ -44,12 +44,11 @@ export default function Page() {
           <header className="border flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">คุณภาพอากาศ</h1>
-              <p className="text-lg font-bold">มจธ, กรุงเทพมหานคร</p>
-              <p>อา. 13 ตุลาคม 2567 8:00 น.</p>
-              
+              <Datetime />
+              <h2 className="text-2xl ">มจธ, กรุงเทพมหานคร</h2>
             </div>
           </header>
-        
+
           {/* Dropdowns */}
           <section className="border flex justify-between items-center mt-4">
             <div className="flex space-x-4">
