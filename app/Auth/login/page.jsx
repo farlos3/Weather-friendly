@@ -25,7 +25,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     setError("");
-  }, [email, password]);
+  }, [email, password, otp]);
 
   // Step 1: Handle Login and Send OTP
   async function handleLogin(event) {

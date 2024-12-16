@@ -1,38 +1,54 @@
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
-// Middleware สำหรับตรวจสอบ token
 export function middleware(request) {
-    // ดึง token จาก headers เช่น 'x-access-token' หรือ 'Authorization'
-    const token = request.headers.get("x-access-token") || 
-                  request.headers.get("authorization")?.split(" ")[1]; // Bearer token
+    const path = request.nextUrl.pathname;
 
-    if (!token) {
-        return NextResponse.json(
-            { message: "Access denied. No token provided." },
-            { status: 403 }
-        );
+    // ตรวจสอบ JWT Token เฉพาะสำหรับ API อื่นที่ไม่ใช่ Login
+    if (path !== "/AuthRoutes/api/auth/login") {
+        const token = request.headers.get("x-access-token") || 
+                      request.headers.get("authorization")?.split(" ")[1];
+
+        if (!token) {
+            return NextResponse.json(
+                { message: "Access denied. No token provided." },
+                { status: 403 }
+            );
+        }
+
+        try {
+            const verified = jwt.verify(token, process.env.SECRET_KEY);
+            const requestHeaders = new Headers(request.headers);
+
+            // เพิ่มข้อมูล user ลงใน Headers
+            requestHeaders.set("x-user", JSON.stringify(verified));
+
+            return NextResponse.next({
+                request: {
+                    headers: requestHeaders,
+                },
+            });
+        } catch (error) {
+            console.error("Token verification failed:", error);
+            return NextResponse.json(
+                { message: "Invalid or expired token." },
+                { status: 401 }
+            );
+        }
     }
 
-    try {
-        const verified = jwt.verify(token, process.env.SECRET_KEY);
-
-        // เพิ่มข้อมูล user ลงใน headers เพื่อนำไปใช้ใน request ถัดไป
-        const requestHeaders = new Headers(request.headers);
-        requestHeaders.set("x-user", JSON.stringify(verified));
-
-        return NextResponse.next({
-            request: {
-                headers: requestHeaders,
-            },
-        });
-    } catch (error) {
-        console.error("Token verification failed:", error);
-        return NextResponse.json(
-            { message: "Invalid or expired token." },
-            { status: 401 }
-        );
+    // ตรวจสอบ OTP เฉพาะสำหรับ Login
+    if (path === "/AuthRoutes/api/auth/login") {
+        const otpVerified = request.headers.get("x-otp-verified");
+        if (otpVerified !== "true") {
+            return NextResponse.json(
+                { message: "OTP verification required." },
+                { status: 401 }
+            );
+        }
     }
+
+    return NextResponse.next();
 }
 
 // ระบุเส้นทางที่ middleware จะทำงาน

@@ -3,14 +3,15 @@ import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/app/models/user";
 import nodemailer from "nodemailer";
 
-let otpCache = {}; // เก็บ OTP ชั่วคราว
+let otpCache = {}; // Temporary OTP storage
 
 export async function POST(request) {
     try {
         await connectMongoDB();
         const { email } = await request.json();
+        const sanitizedEmail = email.trim().toLowerCase();
 
-        const user = await User.findOne({ email }).select("_id");
+        const user = await User.findOne({ email: sanitizedEmail }).select("_id");
         console.log("User: ", user);
 
         if (!user) {
@@ -20,11 +21,14 @@ export async function POST(request) {
             );
         }
 
-        // สร้าง OTP
-        const otp = Math.floor(100000 + Math.random() * 900000); // 6 หลัก
-        otpCache[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // OTP มีอายุ 5 นาที
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit OTP
+        otpCache[sanitizedEmail] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // OTP valid for 5 minutes
 
-        // ส่ง OTP ด้วย nodemailer
+        // Log OTP cache contents
+        console.log("OTP Cache after storing OTP:", otpCache);
+
+        // Send OTP via nodemailer
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -35,20 +39,21 @@ export async function POST(request) {
 
         await transporter.sendMail({
             from: process.env.GMAIL_USER,
-            to: email,
+            to: sanitizedEmail,
             subject: "Your OTP Code",
             text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
         });
 
-        console.log(`OTP sent to ${email}`);
-        
+        console.log(`OTP sent to ${sanitizedEmail}`);
+
         return NextResponse.json({ message: "OTP sent successfully✅" }, { status: 200 });
 
     } catch (error) {
         console.log("Error: ", error);
-        return NextResponse.json({ 
-            message: "An error occurred while sending OTP.", 
-            error: error.message }, { status: 500 }
+        return NextResponse.json({
+            message: "An error occurred while sending OTP.",
+            error: error.message
+        }, { status: 500 }
         );
     }
 }

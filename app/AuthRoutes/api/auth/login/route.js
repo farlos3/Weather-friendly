@@ -3,6 +3,9 @@ import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/app/models/user";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+
+let otpCache = {}; // เก็บ OTP ชั่วคราว
 
 export async function POST(request) {
     try {
@@ -15,10 +18,6 @@ export async function POST(request) {
 
         const user = await User.findOne({ email });
         const modifiedPassword = '123' + password + "456"; // แปลงรหัสผ่านโดยเพิ่ม prefix และ suffix
-        // const isPasswordValid = user ? await bcryptjs.compare(modifiedPassword, user.password) : false;
-        // if (!user || !isPasswordValid) {
-        //     return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
-        // }
 
         if (!process.env.SECRET_KEY) {
             console.error("SECRET_KEY is missing in environment variables");
@@ -29,28 +28,28 @@ export async function POST(request) {
         }
 
         if (user && (await bcryptjs.compare(modifiedPassword, user.password))) {
-            const token = jwt.sign(
-                { id: user._id, email: user.email },
-                process.env.SECRET_KEY,
-                { expiresIn: '1h' }
-            );
+            const otp = Math.floor(100000 + Math.random() * 900000); // 6 หลัก
+            otpCache[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // OTP มีอายุ 5 นาที
 
-            console.log("Generated JWT Token:", token);
+            console.log("\n", otpCache[email], "\n")
 
-            user.token = token;
+            const transporter = nodemailer.createTransport({
+                service: "gmail",
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_PASS,
+                },
+            });
 
-            console.log("Login successful!✅")
-            console.log(`User logged in: ${user.email}\n`);
+            await transporter.sendMail({
+                from: process.env.GMAIL_USER,
+                to: email,
+                subject: "Your OTP Code",
+                text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+            });
 
-            return NextResponse.json({
-                message: "Login successful!✅",
-                User: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    token: token
-                }
-            }, { status: 201 });
+            return NextResponse.json({ message: "OTP sent successfully✅" }, { status: 200 });
+
         } else {
             return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
         }
