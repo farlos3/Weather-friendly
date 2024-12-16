@@ -50,8 +50,7 @@ export async function POST(req) {
                 );
             }
 
-            const token = jwt.sign(
-                {
+            const token = jwt.sign({
                     id: user._id,
                     email: user.email 
                 }, process.env.SECRET_KEY, { expiresIn: '1h' });
