@@ -17,6 +17,8 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "formidable": "^3.5.2",
+    "fs": "^0.0.1-security",
     "iron-session": "^8.0.4",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",

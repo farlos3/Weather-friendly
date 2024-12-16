@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/app/models/user";
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
 var otpCache = {}; // เก็บ OTP ชั่วคราว
