@@ -67,7 +67,7 @@ export default function RegisterPage() {
         const data = await res.json();
         setSuccess("Login successful!");
         setError("");
-        localStorage.setItem("token", data.User.token);
+        localStorage.setItem("token", data.token);
         localStorage.setItem("token_expiry", new Date().getTime() + 3600000);
         setTimeout(() => {
           router.push(redirectTo);

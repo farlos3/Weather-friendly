@@ -3,7 +3,7 @@ import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/app/models/user";
 import nodemailer from "nodemailer";
 
-let otpCache = {}; // Temporary OTP storage
+var otpCache = {}; // Temporary OTP storage
 
 export async function POST(request) {
     try {

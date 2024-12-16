@@ -5,7 +5,7 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 
-let otpCache = {}; // เก็บ OTP ชั่วคราว
+var otpCache = {}; // เก็บ OTP ชั่วคราว
 
 export async function POST(request) {
     try {
@@ -29,9 +29,10 @@ export async function POST(request) {
 
         if (user && (await bcryptjs.compare(modifiedPassword, user.password))) {
             const otp = Math.floor(100000 + Math.random() * 900000); // 6 หลัก
-            otpCache[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // OTP มีอายุ 5 นาที
+            otpCache[email] = { otp };
 
-            console.log("\n", otpCache[email], "\n")
+            console.log("Generated OTP:", otp);
+            console.log("OTP Cache:", otpCache);
 
             const transporter = nodemailer.createTransport({
                 service: "gmail",
@@ -48,7 +49,14 @@ export async function POST(request) {
                 text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
             });
 
-            return NextResponse.json({ message: "OTP sent successfully✅" }, { status: 200 });
+            return NextResponse.json({
+                message: "OTP sent successfully!✅",
+                User: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                }
+            }, { status: 200 });
 
         } else {
             return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });

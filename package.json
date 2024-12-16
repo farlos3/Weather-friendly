@@ -28,7 +28,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106"
+    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
