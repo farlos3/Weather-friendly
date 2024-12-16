@@ -8,7 +8,7 @@ import "/app/globals.css";
 import React, { useState, useEffect } from "react";
 
 export default function Page() {
-  const mapKey = "78e3e19c34fc8b7af0e4e03ed3b97960"; // API Key จาก Longdo
+  const mapKey = process.env.NEXT_PUBLIC_LONGDO_MAP_KEY; // API Key จาก Longdo
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   // ฟังก์ชันในการตั้งค่าแผนที่
