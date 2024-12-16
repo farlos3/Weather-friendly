@@ -6,7 +6,7 @@ import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { longdo, map, LongdoMap } from "../components/LongdoMap";
+import LongdoMap, { longdo, map } from "../components/LongdoMap";
 import Dropdown from "../components/Dropdown";
 
 {
