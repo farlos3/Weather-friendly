@@ -8,6 +8,8 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { longdo, map, LongdoMap } from "../components/LongdoMap";
 import Dropdown from "../components/Dropdown";
+
+{ /* ---------------------------- Token and State login  ---------------------------- */ }
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
 import {
@@ -18,6 +20,7 @@ import {
   removeTokenExpiry,
 } from "../utils/auth";
 import { useRouter } from "next/navigation";
+{ /* ---------------------------- Token and State login  ---------------------------- */ }
 import { Cloud, CloudRain, Sun } from "lucide-react";
 import axios from "axios";
 
@@ -33,7 +36,6 @@ export default function Home() {
   const [province, setProvince] = useState("");
   const [region, setRegion] = useState("C");
   const [sevenDaysForecastData, setSevenDaysForecastData] = useState(null);
-
 
   useEffect(() => {
     const token = getToken();

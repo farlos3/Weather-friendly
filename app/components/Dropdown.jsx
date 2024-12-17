@@ -8,9 +8,12 @@ const Dropdown = ({
   region,
   setProvince,
   setRegion,
+  timeRange,
+  setTimeRange, // State สำหรับ "รายวัน" และ "รายชั่วโมง"
   zoomToRegion,
-  onChangeFetchData, // ฟังก์ชันสำหรับ fetch ข้อมูลเมื่อมีการเปลี่ยนค่า
+  onChangeFetchData, // ฟังก์ชัน fetch ข้อมูล
 }) => {
+  // ฟังก์ชันเปลี่ยนจังหวัด
   const handleProvinceChange = (event) => {
     const selectedProvince = event.target.value;
     setProvince(selectedProvince);
@@ -19,18 +22,28 @@ const Dropdown = ({
     }
   };
 
+  // ฟังก์ชันเปลี่ยนภาค
   const handleRegionChange = (event) => {
     const selectedRegion = event.target.value;
     setRegion(selectedRegion);
     if (onChangeFetchData) {
-      onChangeFetchData(selectedRegion); // เรียกฟังก์ชันจาก props
+      onChangeFetchData(selectedRegion, "region");
     }
   };
-  
+
+  // ฟังก์ชันเปลี่ยนช่วงเวลา (รายวัน/รายชั่วโมง)
+  const handleTimeRangeChange = (event) => {
+    const selectedTimeRange = event.target.value;
+    setTimeRange(selectedTimeRange);
+    if (onChangeFetchData) {
+      onChangeFetchData(selectedTimeRange, "timeRange");
+    }
+  };
 
   return (
-    <div className="mt-4 mb-4">
-      {isLoggedIn ? (
+    <div className="mt-4 mb-4 flex flex-col gap-4">
+      {/* Dropdown สำหรับจังหวัด */}
+      {isLoggedIn && (
         <select
           value={province}
           onChange={handleProvinceChange}
@@ -43,7 +56,10 @@ const Dropdown = ({
             </option>
           ))}
         </select>
-      ) : (
+      )}
+
+      {/* Dropdown สำหรับภาค */}
+      {!isLoggedIn && (
         <select
           value={region}
           onChange={handleRegionChange}

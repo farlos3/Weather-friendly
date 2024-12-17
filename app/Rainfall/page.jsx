@@ -5,51 +5,150 @@ import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import "/app/globals.css";
+import { findNearestProvince } from "../utils/findNearestProvince";
+import { createRainfallChart } from "../utils/createRainfallChart";
 
-{/* ---------------------------- Token and State login  ---------------------------- */}
-import { useEffect, useState } from "react";
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
+import { useEffect, useState, React } from "react";
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
-import { getToken, setToken, setTokenExpiry, removeToken, removeTokenExpiry, } from "../utils/auth";
+import {
+  getToken,
+  setToken,
+  setTokenExpiry,
+  removeToken,
+  removeTokenExpiry,
+} from "../utils/auth";
 import { useRouter } from "next/navigation";
-{/* ---------------------------- Token and State login  ---------------------------- */}
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
 
 export default function page() {
-
-{/* ---------------------------- Set Token  ---------------------------- */}
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [province, setProvince] = useState("");
+  const [region, setRegion] = useState("");
+  const [timeRange, setTimeRange] = useState("daily"); // ค่าเริ่มต้น: รายวัน
+  const [rainfallData, setRainfallData] = useState([]); // เก็บข้อมูลฝนจาก API
 
   useEffect(() => {
     const token = getToken();
     if (token) {
       setIsLoggedIn(true);
       setTokenExpiry();
+      console.log("Already Token");
+    } else {
+      console.log("Not yet Token");
     }
-    console.log("token: ", token);
+    // console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
     removeToken();
-    console.log("After logout, \ntoken:", getToken());
-
-    setIsLoggedIn(false); // อัปเดตสถานะเป็น Logged out
+    setIsLoggedIn(false);
     router.push("/");
   };
-
-  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
 
   const handleProfileClick = () => {
     setIsProfilePopupVisible(!isProfilePopupVisible);
   };
-{/* ---------------------------- Set Token  ---------------------------- */}
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLat = position.coords.latitude;
+          const userLon = position.coords.longitude;
+          setLatitude(userLat);
+          setLongitude(userLon);
+
+          const nearest = findNearestProvince(userLat, userLon);
+          if (nearest) {
+            setProvince(nearest.name); // อัปเดตจังหวัด
+            setRegion(nearest.region); // อัปเดตภาค
+          }
+          console.log(
+            "จังหวัดที่ใกล้ที่สุด:",
+            nearest.name,
+            "\ntype:",
+            typeof nearest.name
+          );
+          console.log(
+            "ภาคที่ใกล้ที่สุด:",
+            nearest.region,
+            "\ntype:",
+            typeof nearest.region
+          );
+        },
+        (error) => {
+          console.error("Error getting location:", error.message);
+          setProvince("ไม่สามารถดึงข้อมูลตำแหน่งได้");
+          setRegion("ไม่สามารถระบุภาคได้");
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+      setProvince("ไม่รองรับการดึงตำแหน่ง");
+      setRegion("ไม่รองรับการระบุภาค");
+    }
+  }, [province, region]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let url = "";
+        const location = { latitude, longitude };
+        const { latitude: lat, longitude: lon } = location;
+        console.log("Province:", province, "\nRegion:", region);
+
+        if (isLoggedIn && province) {
+          // กรณีล็อกอิน: ใช้จังหวัดที่เลือก
+          url = `/ExternalAPI/api/weatherTMD?province=${province}&timeRange=${timeRange}`;
+          console.log("API Request URL:", url);
+        } else if (!isLoggedIn && region) {
+          // กรณีไม่ได้ล็อกอิน: ใช้ข้อมูลพิกัดของภาค
+          if (region) {
+            url = `/ExternalAPI/api/weatherTMD?lat=${lat}&lon=${lon}&timeRange=${timeRange}`;
+            console.log("API Request URL:", url);
+          } else {
+            console.error("Invalid region:", region);
+            return;
+          }
+        }
+
+        // เรียก API
+        if (url) {
+          const response = await fetch(url);
+          if (response.ok) {
+            const result = await response.json();
+            setRainfallData(result); // บันทึกข้อมูลที่ได้ไว้ใน state
+          } else {
+            console.error("Error fetching data:", response.status);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    // Trigger only when necessary states are updated
+    if ((isLoggedIn && province) || (!isLoggedIn && latitude && longitude)) {
+      fetchData();
+    }
+  }, [isLoggedIn, province, latitude, longitude, timeRange]);
 
   return (
     <div
       className="bg-cover bg-center w-full h-screen flex flex-col"
-      style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}>
-{/* ---------------------------- Token and State login  ---------------------------- */}
-      <div className="flex justify-between items-center p-4 border-b">
+      style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
+    >
+      <div className="flex justify-between items-center border-b">
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
@@ -64,7 +163,7 @@ export default function page() {
               <ProfilePopup
                 isVisible={isProfilePopupVisible}
                 onClose={() => setIsProfilePopupVisible(false)}
-                onLogout={handleLogout} // ส่งฟังก์ชัน handleLogout ไปที่ ProfilePopup
+                onLogout={handleLogout}
               />
             </div>
           </div>
@@ -72,35 +171,74 @@ export default function page() {
           <RegisterButton />
         )}
       </div>
-{/* ---------------------------- Token and State login  ---------------------------- */}
 
-      <div className="flex h-full max-[100%]">
+      <div className="flex h-full">
         <Navbar />
-
         <div className="inline w-full border-4 border-blue-500/75">
           <div className="flex ml-10 h-[30%] border-4 border-red-500/75">
-            <div className="w-[30%] border-4 border-black">
+            <div className="w-[30%] p-4">
               <h1 className="text-[2.5rem] font-bold">ปริมาณฝน</h1>
               <Datetime />
-              <p className="text-[1.5rem]">ภาคกลาง</p>
+              <p className="text-[1.5rem]">{isLoggedIn ? province : region}</p>
+
+              {/* เลือกช่วงเวลา */}
+              <select
+                id="timeRange"
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+              >
+                <option value="daily">รายวัน</option>
+                <option value="hourly">รายชั่วโมง</option>
+              </select>
             </div>
 
-            <div className="border-4 border-indigo-500/75 w-[70%] h-full max-[100%]">
-              ใส่ข้อมูลปริมาณฝนตรงนี้
+            <div className="border-4 border-indigo-500/75 w-[70%] h-full">
+              <h2 className="text-2xl font-semibold">
+                ข้อมูลฝน {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}
+              </h2>
+              <p>จังหวัดที่เลือก: {province || "ยังไม่เลือก"}</p>
+              <p>
+                ตำแหน่งปัจจุบัน: Latitude: {latitude || "กำลังโหลด..."}{" "}
+                Longitude: {longitude || "กำลังโหลด..."}
+              </p>
             </div>
           </div>
-          <div className=" flex items-center ml-[2.5rem] h-[70%] gap-x-4 border-4 border-red-500">
-            <div className="w-[20%] h-[70%] border-4 border-yellow-500">
-              ปริมาณฝนรายชั่วโมง
-            </div>
-            <div className="w-[20%] h-[70%] border-4 border-yellow-500">
-              ปริมาณฝนรายชั่วโมง
-            </div>
-            <div className="w-[20%] h-[70%] border-4 border-yellow-500">
-              ปริมาณฝนรายชั่วโมง
-            </div>
-            <div className="w-full h-[70%] border-4 border-yellow-500">
-              กราฟฝนรายชั่วโมง
+
+          <div className="flex items-center ml-[2.5rem] h-[70%] gap-x-4 border-4 border-red-500">
+            {/* วนซ้ำ forecasts */}
+            {rainfallData?.WeatherForecasts?.[0]?.forecasts
+              ?.slice(1, 7)
+              .map((item, index) => {
+                const { data } = item;
+                const { rain, ws10m, rh } = data || {};
+
+                return (
+                  <div
+                    key={index}
+                    className="w-[20%] h-[70%] border-4 border-yellow-500 flex flex-col justify-center p-2"
+                  >
+                    <div>
+                      ปริมาณฝน{" "}
+                      {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "}
+                      {rain ?? "ไม่มีข้อมูล"} %
+                    </div>
+                    <div>
+                      ความเร็วลม{" "}
+                      {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "}
+                      {ws10m ?? "ไม่มีข้อมูล"} m/s
+                    </div>
+                    <div>
+                      ความชื้นสัมพัทธ์{" "}
+                      {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "}
+                      {rh ?? "ไม่มีข้อมูล"} %
+                    </div>
+                  </div>
+                );
+              })}
+
+            {/* ส่วนแสดงกราฟ */}
+            <div className="w-full h-[70%] border-4 border-yellow-500 flex justify-center items-center">
+              กราฟฝน {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}
             </div>
           </div>
         </div>
