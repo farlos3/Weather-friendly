@@ -4,12 +4,14 @@ import { NextResponse } from "next/server";
 export function middleware(request) {
     const path = request.nextUrl.pathname;
 
-    // ตรวจสอบ JWT Token เฉพาะสำหรับ API อื่นที่ไม่ใช่ Login
     if (path !== "/AuthRoutes/api/auth/login") {
-        const token = request.headers.get("x-access-token") || 
-                      request.headers.get("authorization")?.split(" ")[1];
+        // Extract the token from headers
+        const token = 
+            request.headers.get("x-access-token") || 
+            request.headers.get("authorization")?.split(" ")[1];
 
         if (!token) {
+            console.error("Access attempt without token.");
             return NextResponse.json(
                 { message: "Access denied. No token provided." },
                 { status: 403 }
@@ -17,10 +19,13 @@ export function middleware(request) {
         }
 
         try {
+            // Verify the token
             const verified = jwt.verify(token, process.env.SECRET_KEY);
+
+            // Clone the existing headers
             const requestHeaders = new Headers(request.headers);
 
-            // เพิ่มข้อมูล user ลงใน Headers
+            // Add user data to headers
             requestHeaders.set("x-user", JSON.stringify(verified));
 
             return NextResponse.next({
@@ -29,7 +34,8 @@ export function middleware(request) {
                 },
             });
         } catch (error) {
-            console.error("Token verification failed:", error);
+            console.error("Token verification failed:", error.message);
+
             return NextResponse.json(
                 { message: "Invalid or expired token." },
                 { status: 401 }
@@ -37,10 +43,11 @@ export function middleware(request) {
         }
     }
 
-    // ตรวจสอบ OTP เฉพาะสำหรับ Login
     if (path === "/AuthRoutes/api/auth/login") {
         const otpVerified = request.headers.get("x-otp-verified");
+        
         if (otpVerified !== "true") {
+            console.warn("OTP verification failed during login.");
             return NextResponse.json(
                 { message: "OTP verification required." },
                 { status: 401 }
@@ -48,10 +55,11 @@ export function middleware(request) {
         }
     }
 
+    // Allow request to continue
     return NextResponse.next();
 }
 
-// ระบุเส้นทางที่ middleware จะทำงาน
+// Apply middleware to specific routes
 export const config = {
-    matcher: ["/api/:path*"], // ใช้ middleware กับทุกเส้นทางที่เป็น API เท่านั้น
+    matcher: ["/api/:path*"], // Middleware for all API routes
 };

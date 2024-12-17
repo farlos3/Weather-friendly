@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function RegisterPage() {
-
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -16,13 +15,13 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const redirectTo = searchParams.get('redirect') || '/';
+  const redirectTo = searchParams.get("redirect") || "/";
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (password != confirmPassword) {
-      setError("Password do not match!");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match!");
       return;
     }
 
@@ -32,7 +31,8 @@ export default function RegisterPage() {
     }
 
     try {
-      const resCheckUser = await fetch("http://localhost:3000/AuthRoutes/api/checkUser", {
+      // Check if user exists
+      const resCheckUser = await fetch("/AuthRoutes/api/checkUser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,13 +40,14 @@ export default function RegisterPage() {
         body: JSON.stringify({ email }),
       });
 
-      const { user } = await resCheckUser.json();
-      if (user) {
+      const dataCheckUser = await resCheckUser.json();
+      if (dataCheckUser.user) {
         setError("User already exists!");
         return;
       }
 
-      const res = await fetch("http://localhost:3000/AuthRoutes/api/auth/signup", {
+      // Proceed to signup
+      const res = await fetch("/AuthRoutes/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,20 +59,24 @@ export default function RegisterPage() {
         }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        const form = event.target;
         setError("");
-        setSuccess("User registeration successfully!✅");
+        setSuccess("User registration successful!✅");
         setTimeout(() => {
           router.push(redirectTo);
         }, 500);
-        form.reset();
+        setName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
       } else {
-        console.log("User registration failed.💥");
+        setError(data.message || "User registration failed💥");
       }
     } catch (error) {
       setError("Error during registration. Please try again.");
-      console.log("Error during registration: ", error);
+      console.error("Error during registration: ", error);
     }
   }
 
@@ -171,8 +176,11 @@ export default function RegisterPage() {
           <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-gray-600">
               มีบัญชีอยู่แล้ว?{" "}
-              <Link href="./login"
-                className="text-blue-600 hover:text-blue-700 font-medium hover:underline">ลงชื่อเข้าใช้ที่นี่
+              <Link
+                href="./login"
+                className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
+              >
+                ลงชื่อเข้าใช้ที่นี่
               </Link>
             </p>
           </div>
