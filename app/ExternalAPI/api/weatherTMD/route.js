@@ -4,11 +4,14 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const province = searchParams.get('province');
   const region = searchParams.get('region');
+  const lat = searchParams.get('lat');  // รับค่าพิกัด lat
+  const lon = searchParams.get('lon');  // รับค่าพิกัด lon
   const TMD_ACCESS_TOKEN = process.env.TMD_ACCESS_TOKEN;
 
-  if (!province && !region) {
+  // เช็คหากไม่มีทั้ง province และ lat, lon
+  if (!province && !region && (!lat || !lon)) {
     return NextResponse.json(
-      { error: 'Province name is required' },
+      { error: 'Province or coordinates (lat, lon) are required' },
       { status: 400 }
     );
   }
@@ -18,9 +21,11 @@ export async function GET(request) {
 
   let url;
   if (province) {
-    url = `https://data.tmd.go.th/nwpapi/v1/forecast/location/hourly/place?province=${encodeURIComponent(province)}&fields=${fields}&duration=${duration}`;
-  } else {
-    url = `https://data.tmd.go.th/nwpapi/v1/forecast/location/hourly/region?region=${encodeURIComponent(region)}&fields=${fields}&duration=${duration}`;
+    // ใช้ province
+    url = `https://data.tmd.go.th/nwpapi/v1/forecast/location/place?province=${encodeURIComponent(province)}&fields=${fields}&duration=${duration}`;
+  } else if (lat && lon) {
+    // ใช้ lat, lon ถ้าไม่มี province
+    url = `https://data.tmd.go.th/nwpapi/v1/forecast/location/daily/at?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&fields=${fields}&duration=${duration}`;
   }
 
   try {
