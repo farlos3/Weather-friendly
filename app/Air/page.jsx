@@ -5,6 +5,11 @@ import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import "/app/globals.css";
+import { findNearestProvince } from "../utils/findNearestProvince";
+import { findTop5NearestProvinces } from "../utils/Top5NearestProvinces";
+
+import { Cloud, CloudRain, Sun } from "lucide-react";
+import LongdoMap, { longdo, map } from "../components/LongdoMap";
 
 {
   /* ---------------------------- Token and State login  ---------------------------- */
@@ -25,11 +30,23 @@ import { useRouter } from "next/navigation";
 }
 
 export default function Page() {
-  {
-    /* ---------------------------- Set Token  ---------------------------- */
-  }
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [airQualityData, setAirQualityData] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [filteredLocations, setFilteredLocations] = useState([]);
+  const [province, setProvince] = useState("");
+  const [region, setRegion] = useState("");
+  const [airData, setAirData] = useState([]); // เก็บข้อมูลฝนจาก API
+
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+
+  const OPENWEATHER_API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
+  const mapKey = process.env.NEXT_PUBLIC_LONGDO_MAP_KEY;
+  // const [isMapLoaded, setIsMapLoaded] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -44,142 +61,88 @@ export default function Page() {
     removeToken();
     console.log("After logout, \ntoken:", getToken());
 
-    setIsLoggedIn(false); // อัปเดตสถานะเป็น Logged out
+    setIsLoggedIn(false);
     router.push("/");
   };
-
-  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
 
   const handleProfileClick = () => {
     setIsProfilePopupVisible(!isProfilePopupVisible);
   };
-  {
-    /* ---------------------------- Set Token  ---------------------------- */
-  }
 
-  const [searchText, setSearchText] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [userPosition, setUserPosition] = useState(null);
-  const [airQualityData, setAirQualityData] = useState([]);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [filteredLocations, setFilteredLocations] = useState([]);
-
-  const OPENWEATHER_API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
-  const mapKey = process.env.NEXT_PUBLIC_LONGDO_MAP_KEY;
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
-
-  // Fetch user's location on load
   useEffect(() => {
-    if (userPosition) {
-      fetchAirQualityData(
-        userPosition.lat,
-        userPosition.lon,
-        "ตำแหน่งของคุณ",
-        true
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLat = position.coords.latitude;
+          const userLon = position.coords.longitude;
+          setLatitude(userLat);
+          setLongitude(userLon);
+
+          const nearest = findNearestProvince(userLat, userLon);
+          const nearest_5 = findTop5NearestProvinces(userLat, userLon);
+          if (nearest) {
+            setProvince(nearest.name); // อัปเดตจังหวัด
+            setRegion(nearest.region); // อัปเดตภาค
+          }
+          // console.log("จังหวัดที่ใกล้ที่สุด:", nearest.name, "\ntype:", typeof nearest.name);
+          // console.log("ภาคที่ใกล้ที่สุด:", nearest.region, "\ntype:", typeof nearest.region);
+        },
+        (error) => {
+          console.error("Error getting location:", error.message);
+          setProvince("ไม่สามารถดึงข้อมูลตำแหน่งได้");
+          setRegion("ไม่สามารถระบุภาคได้");
+        }
       );
-      fetchNearbyLocations(userPosition.lat, userPosition.lon); // ดึงจังหวัดใกล้เคียง
-    }
-  }, [userPosition]);
-
-  const initMap = () => {
-    if (window.longdo && window.longdo.Map) {
-      const map = new window.longdo.Map({
-        placeholder: document.getElementById("longdo-map"), // Div ID สำหรับแผนที่
-        geolocation: true, // เปิดใช้ปุ่ม Geolocation
-      });
-
-      map.Layers.setBase(window.longdo.Layers.NORMAL);
-      map.location({ lon: 100.5018, lat: 13.7563 }, true); // Initial position (Bangkok)
-      map.zoom(6, true); // Set zoom level
-      setIsMapLoaded(true);
-    }
-  };
-
-  // Load Longdo Map Script
-  useEffect(() => {
-    const existingScript = document.getElementById("longdoMapScript");
-
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.src = `https://api.longdo.com/map/?key=${mapKey}`;
-      script.id = "longdoMapScript";
-      document.body.appendChild(script);
-
-      script.onload = initMap;
     } else {
-      initMap();
+      console.error("Geolocation is not supported by this browser.");
+      setProvince("ไม่รองรับการดึงตำแหน่ง");
+      setRegion("ไม่รองรับการระบุภาค");
     }
-  }, [mapKey]);
+  }, [province, region]);
 
-  // Fetch air quality data near the user's position
   useEffect(() => {
-    if (userPosition) {
-      fetchAirQualityData(
-        userPosition.lat,
-        userPosition.lon,
-        "ตำแหน่งของคุณ",
-        true
-      );
-      fetchNearbyLocations(userPosition.lat, userPosition.lon); // ดึงจังหวัดใกล้เคียง
-    }
-  }, [userPosition]);
+    const fetchData = async () => {
+      try {
+        let url = "";
+        // const location = { latitude, longitude };
+        // const { latitude: lat, longitude: lon } = location;
+        console.log("Province:", province, "\nRegion:", region);
 
-  const fetchAirQualityData = async (
-    lat,
-    lon,
-    locationName = "Unknown",
-    isUserLocation = false
-  ) => {
-    try {
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}`
-      );
-      const data = await response.json();
-      if (data.list) {
-        const newData = {
-          location: locationName,
-          isUserLocation,
-          components: data.list[0].components,
-          aqi: data.list[0].main.aqi,
-        };
+        if (isLoggedIn && province) {
+          // กรณีล็อกอิน: ใช้จังหวัดที่เลือก
+          url = `/ExternalAPI/api/Air4Thai?groupType=province&province=${province}`;
+        } else if (!isLoggedIn && region) {
+          // กรณีไม่ได้ล็อกอิน: ใช้ข้อมูลพิกัดของภาค
+          if (region) {
+            url = `/ExternalAPI/api/Air4Thai?groupType=region&region=${region}`;
+          } else {
+            console.error("No valid province or region to fetch data.");
+            return;
+          }
+        }
 
-        setAirQualityData((prevData) => {
-          // ลบตำแหน่งที่ซ้ำกันก่อนเพิ่มข้อมูลใหม่
-          const filteredData = prevData.filter(
-            (item) => item.location !== locationName
-          );
-          return [newData, ...filteredData]; // ใส่ข้อมูลใหม่ที่ด้านบน
-        });
+        console.log("API Request URL:", url);
+
+        // เรียก API
+        if (url) {
+          const response = await fetch(url);
+          if (response.ok) {
+            const result = await response.json();
+            setAirData(result); // บันทึกข้อมูลที่ได้ไว้ใน state
+          } else {
+            console.error("Error fetching data:", response.status);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching air quality data:", error);
-    }
-  };
+    };
 
-  const fetchNearbyLocations = async (userLat, userLon) => {
-    try {
-      const nearbyLocations = await getNearbyProvinces(userLat, userLon); // ดึงจังหวัดใกล้เคียงจาก API
-      nearbyLocations.forEach((location) => {
-        fetchAirQualityData(location.lat, location.lon, location.name, false);
-      });
-    } catch (error) {
-      console.error("Error fetching nearby locations:", error);
+    // Trigger only when necessary states are updated
+    if ((isLoggedIn && province) || (!isLoggedIn && region)) {
+      fetchData();
     }
-  };
-
-  // Fetch latitude and longitude using OpenWeatherMap Geocoding API
-  const fetchCoordinates = async (query) => {
-    try {
-      const response = await fetch(
-        `http://api.openweathermap.org/geo/1.0/direct?q=${query},TH&limit=5&appid=${OPENWEATHER_API_KEY}`
-      );
-      const data = await response.json();
-      setFilteredLocations(data);
-      setIsDropdownOpen(true);
-    } catch (error) {
-      console.error("Error fetching location data:", error);
-    }
-  };
+  }, [isLoggedIn, province, latitude, longitude]);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -193,11 +156,16 @@ export default function Page() {
     }
   };
 
+  const onMapInit = (mapInstance) => {
+    mapInstance.Layers.setBase(longdo.Layers.NORMAL);
+    mapInstance.location({ lon: 100.5018, lat: 13.7563 }, true);
+    map.zoom(6, true);
+  };
+
   const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
-    setSearchText(location.name);
-    setIsDropdownOpen(false);
-    fetchAirQualityData(location.lat, location.lon, location.name, false);
+    setSearchText(location.name); // Update the search text with the selected location
+    setProvince(location.name); // Store the selected location in the state
+    setIsDropdownOpen(false); // Close the dropdown
   };
 
   return (
@@ -239,7 +207,9 @@ export default function Page() {
               <h1 className="text-3xl font-bold">คุณภาพอากาศ</h1>
               <Datetime />
               <h2 className="text-2xl">
-                {selectedLocation ? selectedLocation.name : "ตำแหน่งของคุณ"}
+                <p className="text-[1.5rem]">
+                  {isLoggedIn ? province : region}
+                </p>
               </h2>
             </div>
           </header>
@@ -248,7 +218,8 @@ export default function Page() {
           <section className="mt-6">
             <div className="border rounded-lg h-80 mb-4 bg-gray-200">
               {/* Longdo Map */}
-              <div id="longdo-map" className="w-full h-full"></div>
+              {/* <LongdoMap mapKey={mapKey} /> */}
+              <LongdoMap id="homeMap" mapKey={mapKey} onMapInit={onMapInit} />
             </div>
           </section>
         </section>
@@ -276,7 +247,7 @@ export default function Page() {
                   <div
                     key={index}
                     onClick={() => handleLocationSelect(location)}
-                    className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                    className="cursor-pointer px-4 py-2 hover:bg-gray-100"
                   >
                     {location.name}
                   </div>
@@ -285,36 +256,27 @@ export default function Page() {
             )}
           </div>
 
-          {/* Air Quality List */}
-          <div className="bg-yellow-300 rounded-lg border w-full p-4 space-y-4">
+          {/* Air Quality Data */}
+          <div className="mt-4 space-y-4">
             {airQualityData.map((data, index) => (
               <div
                 key={index}
-                className={`flex justify-between items-center p-3 rounded-md ${
-                  data.isUserLocation ? "bg-green-200" : "bg-white"
-                }`}
+                className="p-4 border border-gray-300 rounded-md shadow-sm"
               >
-                <div>
-                  <p className="font-bold text-lg">{data.location}</p>
-                  <p className="text-sm">
-                    PM 2.5: {data.components.pm2_5} μg/m³
-                  </p>
-                  <p className="text-sm">PM 10: {data.components.pm10} μg/m³</p>
-                  <p className="text-sm">Ozone: {data.components.o3} μg/m³</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-bold text-2xl">{data.aqi}</p>
-                  <p className="text-sm">AQI</p>
-                </div>
+                <h3 className="text-lg font-semibold">{data.location}</h3>
+                <p>AQI: {data.aqi}</p>
+                <ul>
+                  {Object.entries(data.components).map(([key, value]) => (
+                    <li key={key}>
+                      {key}: {value}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      <footer className="mt-auto">
-        <Footer />
-      </footer>
     </div>
   );
 }
