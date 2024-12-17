@@ -99,8 +99,10 @@ export default function Home() {
     if (token) {
       setIsLoggedIn(true);
       setTokenExpiry();
-    }
-    console.log("token: ", token);
+      console.log("Already Token");
+    } else {
+      console.log("Not yet Token");
+    }    // console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
