@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/app/models/user";
 import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+
+var otpCache = {};
 
 export async function POST(request) {
     try {
@@ -14,11 +16,7 @@ export async function POST(request) {
         await connectMongoDB();
 
         const user = await User.findOne({ email });
-        const modifiedPassword = '123' + password + "456"; // แปลงรหัสผ่านโดยเพิ่ม prefix และ suffix
-        // const isPasswordValid = user ? await bcryptjs.compare(modifiedPassword, user.password) : false;
-        // if (!user || !isPasswordValid) {
-        //     return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
-        // }
+        const modifiedPassword = '123' + password + "456"; // เพิ่ม prefix และ suffix
 
         if (!process.env.SECRET_KEY) {
             console.error("SECRET_KEY is missing in environment variables");
@@ -28,32 +26,52 @@ export async function POST(request) {
             );
         }
 
-        if (user && (await bcryptjs.compare(modifiedPassword, user.password))) {
-            const token = jwt.sign(
-                { id: user._id, email: user.email },
-                process.env.SECRET_KEY,
-                { expiresIn: '1h' }
+
+        if (!user) {
+            return NextResponse.json(
+                { message: "Account does not exist." },
+                { status: 404 }
             );
-
-            console.log("Generated JWT Token:", token);
-
-            user.token = token;
-
-            console.log("Login successful!✅")
-            console.log(`User logged in: ${user.email}\n`);
-
-            return NextResponse.json({
-                message: "Login successful!✅",
-                User: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    token: token
-                }
-            }, { status: 201 });
-        } else {
-            return NextResponse.json({ message: "Invalid email or password." }, { status: 401 });
         }
+
+        const isPasswordValid = await bcryptjs.compare(modifiedPassword, user.password);
+        if (!isPasswordValid) {
+            return NextResponse.json(
+                { message: "Incorrect password." },
+                { status: 401 }
+            );
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        otpCache[email] = { otp };
+
+        console.log("Generated OTP:", otp);
+        console.log("OTP Cache:", otpCache);
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.GMAIL_USER,
+                pass: process.env.GMAIL_PASS,
+            },
+        });
+
+        await transporter.sendMail({
+            from: process.env.GMAIL_USER,
+            to: email,
+            subject: "Your OTP Code",
+            text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
+        });
+
+        return NextResponse.json({
+            message: "OTP sent successfully!✅",
+            User: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+            }
+        }, { status: 200 });
+
     } catch (error) {
         console.error("Error during login:", error.message);
         console.error("Login error:", error);

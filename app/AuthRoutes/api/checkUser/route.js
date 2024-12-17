@@ -1,21 +1,26 @@
+// checkUser/route.js
+
 import { NextResponse } from "next/server";
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/app/models/user";
 
 export async function POST(request) {
     try {
-        await connectMongoDB();
         const { email } = await request.json();
-        const user = await User.findOne({ email }).select("_id");
-        console.log("User: ", user);
 
-        return NextResponse.json({ user });
+        // Connect to MongoDB
+        await connectMongoDB();
 
+        // Check if the user exists
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            return NextResponse.json({ user: existingUser }, { status: 200 });
+        } else {
+            return NextResponse.json({ user: null }, { status: 200 });
+        }
     } catch (error) {
-        console.log("Error: ", error);
-        return NextResponse.json(
-            { message: "An error occurred while processing the request.", error: error.message },
-            { status: 500 }
-        );
+        console.error("Error during user check:", error);
+        return NextResponse.json({ message: "An error occurred during user check." }, { status: 500 });
     }
 }

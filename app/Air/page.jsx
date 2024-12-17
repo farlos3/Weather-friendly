@@ -4,20 +4,95 @@ import Navbar from "../components/Navbar";
 import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
-import RegisterButton from "../components/RegisterButton";
 import "/app/globals.css";
 
+{/* ---------------------------- Token and State login  ---------------------------- */}
+import { useEffect, useState } from "react";
+import RegisterButton from "../components/RegisterButton";
+import ProfilePopup from "../components/ProfilePopup";
+import { getToken, setToken, setTokenExpiry, removeToken, removeTokenExpiry, } from "../utils/auth";
+import { useRouter } from "next/navigation";
+{/* ---------------------------- Token and State login  ---------------------------- */}
+
 export default function Page() {
+  {/* ---------------------------- Set Token  ---------------------------- */}
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      setIsLoggedIn(true);
+      setTokenExpiry();
+    }
+    console.log("token: ", token);
+  }, []);
+
+  const handleLogout = () => {
+    removeToken();
+    console.log("After logout, \ntoken:", getToken());
+
+    setIsLoggedIn(false); // อัปเดตสถานะเป็น Logged out
+    router.push("/");
+  };
+
+  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
+
+  const handleProfileClick = () => {
+    setIsProfilePopupVisible(!isProfilePopupVisible);
+  };
+{/* ---------------------------- Set Token  ---------------------------- */}
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState("กรุงเทพมหานคร");
+
+  const provinces = [
+    "กรุงเทพมหานคร",
+    "สมุทรปราการ",
+    "นนทบุรี",
+    "ปทุมธานี",
+    "นครปฐม",
+    "ชลบุรี",
+    "ระยอง",
+  ];
+
+  // กรองจังหวัดตามข้อความที่ผู้ใช้พิมพ์
+  const filteredProvinces = provinces.filter((province) =>
+    province.includes(searchText)
+  );
+
   
   return (
     <div
       className="bg-cover bg-center w-full h-screen flex flex-col"
-      style={{ backgroundImage: "url('/img/AirBackground.gif')" }}
-    >
-      <div className="flex justify-between border items-center">
+      style={{ backgroundImage: "url('/img/AirBackground.gif')" }}>
+
+{/* ---------------------------- Token and State login  ---------------------------- */}
+      <div className="flex justify-between items-center p-4 border-b">
         <Headlogo />
-        <RegisterButton />
+        {isLoggedIn ? (
+          <div className="flex items-center space-x-2 relative">
+            <p>Welcome</p>
+            <img
+              src="/img/Account-Icon.png"
+              alt="Profile"
+              className="w-8 h-8 rounded-full cursor-pointer"
+              onClick={handleProfileClick}
+            />
+            <div className="absolute top-full right-0">
+              <ProfilePopup
+                isVisible={isProfilePopupVisible}
+                onClose={() => setIsProfilePopupVisible(false)}
+                onLogout={handleLogout} // ส่งฟังก์ชัน handleLogout ไปที่ ProfilePopup
+              />
+            </div>
+          </div>
+        ) : (
+          <RegisterButton />
+        )}
       </div>
+{/* ---------------------------- Token and State login  ---------------------------- */}
 
       <section className=" border flex h-full w-full max-[100%]">
         <Navbar />
@@ -25,8 +100,8 @@ export default function Page() {
           <header className="border flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">คุณภาพอากาศ</h1>
-              <p className="text-lg font-bold">มจธ, กรุงเทพมหานคร</p>
-              <p>อา. 13 ตุลาคม 2567 8:00 น.</p>
+              <Datetime />
+              <h2 className="text-2xl ">มจธ, กรุงเทพมหานคร</h2>
             </div>
           </header>
 
@@ -47,7 +122,7 @@ export default function Page() {
 
           {/* Map */}
           <section className="mt-6">
-            <div className="border rounded-lg h-60 mb-4 rounded-lg bg-gray-200">
+            <div className="border rounded-lg h-80 mb-4 rounded-lg bg-gray-200">
               <img
                 src="/map-placeholder.png"
                 alt="Map"
@@ -66,25 +141,55 @@ export default function Page() {
           </div>
 
           {/* Search Bar and Dropdown */}
+          <div className="relative">
+            <input
+              type="text"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onFocus={() => setIsDropdownOpen(true)}
+              placeholder="ค้นหาจังหวัด หรือ จุดสถานี"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+            />
+
+            {isDropdownOpen && (
+              <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 max-h-40 overflow-y-auto w-full">
+                {filteredProvinces.map((province, index) => (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      setSelectedProvince(province);
+                      setSearchText(province);
+                      setIsDropdownOpen(false);
+                    }}
+                    className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                  >
+                    {province}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* AQI List */}
-          <div className="bg-yellow-300 rounded-lg border h-full w-full p-4 space-y-4 ">
-            {["กรุงเทพมหานคร", "สมุทรปราการ"].map((location, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center bg-white p-3 rounded-md"
-              >
-                <div>
-                  <p className="font-bold text-lg">{location}</p>
-                  <p className="text-sm">PM 2.5: 35 μg/m³</p>
-                  <p className="text-sm">13 ต.ค. 2024 22:00</p>
+          <div className="bg-yellow-300 rounded-lg border w-full p-4 space-y-4 ">
+            {["กรุงเทพมหานคร", "สมุทรปราการ", "นนทบุรี", "ปทุมธานี"].map(
+              (location, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center bg-white p-3 rounded-md"
+                >
+                  <div>
+                    <p className="font-bold text-lg">{location}</p>
+                    <p className="text-sm">PM 2.5: 35 μg/m³</p>
+                    <p className="text-sm">13 ต.ค. 2024 22:00</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-bold text-2xl">70</p>
+                    <p className="text-sm">AQI</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="font-bold text-2xl">70</p>
-                  <p className="text-sm">AQI</p>
-                </div>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
       </section>
