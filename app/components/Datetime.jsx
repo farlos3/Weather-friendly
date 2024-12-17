@@ -46,7 +46,7 @@ export default function Datetime() {
 
   return (
     <div className="flex flex-col text-[20pt]">
-      <div className="text-[32pt] font-bold w-max ">{formattedTime}</div>
+      <div className="text-[30pt] font-bold w-max ">{formattedTime}</div>
       <div className="date">
         {day},{date} {month} {year}
       </div>
