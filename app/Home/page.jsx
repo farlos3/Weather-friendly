@@ -43,7 +43,8 @@ export default function Home() {
       console.log("Already Token");
     } else {
       console.log("Not yet Token");
-    }    // console.log("token: ", token);
+    } 
+    // console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
