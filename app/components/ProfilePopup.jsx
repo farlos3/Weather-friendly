@@ -19,7 +19,7 @@ const ProfilePopup = ({ isVisible, onClose, onLogout }) => {
           throw new Error("No token found. Please log in.");
         }
         const response = await fetch(
-          "/AuthRoutes/api/GetUpdateUser/getUserProfile",
+          "/AuthRoutes/api/GetUpdateDeleteUser/getUserProfile",
           {
             method: "GET",
             headers: {
@@ -52,7 +52,7 @@ const ProfilePopup = ({ isVisible, onClose, onLogout }) => {
       if (!token) throw new Error("No token found. Please log in.");
 
       const response = await fetch(
-        "/AuthRoutes/api/GetUpdateUser/updateUser",
+        "/AuthRoutes/api/GetUpdateDeleteUser/updateUser",
         {
           method: "PUT",
           headers: {
@@ -80,6 +80,41 @@ const ProfilePopup = ({ isVisible, onClose, onLogout }) => {
     }
   };
 
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm(
+      "คุณแน่ใจหรือไม่ว่าต้องการลบบัญชีผู้ใช้นี้? การลบนี้จะไม่สามารถย้อนกลับได้"
+    );
+    if (!confirmDelete) return;
+
+    setLoading(true);
+    try {
+      const token = getToken();
+      if (!token) throw new Error("No token found. Please log in.");
+
+      const response = await fetch(
+        "/AuthRoutes/api/GetUpdateDeleteUser/deleteUser",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.message || "Failed to delete account.");
+
+      alert("บัญชีผู้ใช้ของคุณถูกลบเรียบร้อยแล้ว");
+      onLogout();
+    } catch (error) {
+      console.error("Error deleting account:", error.message);
+      alert("Failed to delete account. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleSave();
   };
@@ -87,94 +122,115 @@ const ProfilePopup = ({ isVisible, onClose, onLogout }) => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-0 flex justify-center items-center">
-      <div className="bg-white p-6 rounded-md shadow-lg w-80 flex flex-col items-center">
-        <h3 className="text-xl font-bold mb-4">โปรไฟล์ของคุณ</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-0 p-4">
+      <div className="bg-white w-full max-w-md rounded-lg shadow-2xl overflow-hidden animate-fade-in">
+        <div className="bg-blue-50 p-6 border-b border-blue-100">
+          <h3 className="text-2xl font-semibold text-blue-800 text-center">
+            โปรไฟล์ของคุณ
+          </h3>
+        </div>
+
         {loading ? (
-          <p>Loading...</p>
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-500"></div>
+          </div>
         ) : (
-          <>
-            <div className="mb-4 flex flex-col items-center">
-              <img
-                src="/img/Account-Icon.png"
-                alt="Profile"
-                className="w-24 h-24 rounded-full border-4 border-gray-300"
-              />
-              <p className="mt-2 text-sm text-blue-500 cursor-pointer hover:underline">
+          <div className="p-6">
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative">
+                <img
+                  src="/img/Account-Icon.png"
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full border-4 border-blue-200 shadow-md"
+                />
+              </div>
+              <p className="mt-3 text-sm text-blue-600 hover:underline cursor-pointer">
                 รูปโปรไฟล์
               </p>
             </div>
 
-            <div className="w-full mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="name">
-                ชื่อ:
-              </label>
-              <div className="flex items-center justify-between">
-                {isEditing ? (
-                  <input
-                    type="text"
-                    id="name"
-                    className="w-full p-2 border border-gray-300 rounded mr-2"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                  />
-                ) : (
-                  <>
-                    <p className="text-gray-900">{profile.name}</p>
-                    <button
-                      className="text-yellow-500 hover:text-yellow-600"
-                      onClick={() => setIsEditing(true)}
-                    >
-                      ✏️
-                    </button>
-                  </>
-                )}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-2" htmlFor="name">
+                  ชื่อ:
+                </label>
+                <div className="flex items-center">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      id="name"
+                      className="flex-grow p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                    />
+                  ) : (
+                    <>
+                      <p className="flex-grow text-gray-900">{profile.name}</p>
+                      <button
+                        className="text-blue-500 hover:text-blue-600 transition-colors"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        ✏️
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-2" htmlFor="email">
+                  อีเมล:
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md">
+                  {profile.email}
+                </p>
               </div>
             </div>
-            <div className="w-full mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="email">
-                อีเมล:
-              </label>
-              <p className="text-gray-900">{profile.email}</p>
-            </div>
-            <div className="flex justify-end space-x-2 w-full">
-              {isEditing ? (
-                <>
-                  <button
-                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                    onClick={() => {
-                      setIsEditing(false);
-                      setEditedName(profile.name);
-                    }}
-                  >
-                    ยกเลิก
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={handleSave}
-                    disabled={loading}
-                  >
-                    บันทึก
-                  </button>
-                </>
-              ) : null}
-            </div>
-            <div className="flex justify-between w-full mt-4">
+
+            {isEditing && (
+              <div className="flex justify-end space-x-2 mt-4">
+                <button
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditedName(profile.name);
+                  }}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  onClick={handleSave}
+                  disabled={loading}
+                >
+                  บันทึก
+                </button>
+              </div>
+            )}
+
+            <div className="mt-6 grid grid-cols-3 gap-2">
               <button
-                className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
                 onClick={onClose}
               >
                 ปิด
               </button>
               <button
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                ลบบัญชีผู้ใช้
+              </button>
+              <button
+                className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
                 onClick={onLogout}
               >
                 ออกจากระบบ
               </button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
