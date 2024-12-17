@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import "/app/globals.css";
 import { findNearestProvince } from "../utils/findNearestProvince";
-import { createRainfallChart } from "../utils/createRainfallChart";
+import { RelativeHumidityChart } from "../utils/RainfallChart";
 
 {
   /* ---------------------------- Token and State login  ---------------------------- */
@@ -238,7 +238,10 @@ export default function page() {
 
             {/* ส่วนแสดงกราฟ */}
             <div className="w-full h-[70%] border-4 border-yellow-500 flex justify-center items-center">
-              กราฟฝน {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}
+              <RelativeHumidityChart
+                forecasts={rainfallData?.WeatherForecasts?.[0]?.forecasts || []}
+                timeRange={timeRange}
+              />
             </div>
           </div>
         </div>

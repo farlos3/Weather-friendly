@@ -250,15 +250,8 @@ export default function Home() {
               src="/img/Account-Icon.png"
               alt="Profile"
               className="w-8 h-8 rounded-full cursor-pointer"
-              onClick={handleProfileClick}
             />
-            <div className="absolute top-full right-0">
-              <ProfilePopup
-                isVisible={isProfilePopupVisible}
-                onClose={() => setIsProfilePopupVisible(false)}
-                onLogout={handleLogout}
-              />
-            </div>
+            <ProfilePopup isVisible={true} onLogout={handleLogout} />
           </div>
         ) : (
           <RegisterButton />
