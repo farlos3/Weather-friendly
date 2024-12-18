@@ -6,12 +6,15 @@ import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { longdo, map, LongdoMap } from "../components/LongdoMap";
+import LongdoMap, { longdo, map } from "../components/LongdoMap";
 import Dropdown from "../components/Dropdown";
+import { Cloud, CloudRain, Sun } from "lucide-react";
+// import axios from "axios";
 
 {
   /* ---------------------------- Token and State login  ---------------------------- */
 }
+
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
 import {
@@ -25,14 +28,12 @@ import { useRouter } from "next/navigation";
 {
   /* ---------------------------- Token and State login  ---------------------------- */
 }
-import { Cloud, CloudRain, Sun } from "lucide-react";
-import axios from "axios";
 
 export default function Home() {
   const router = useRouter();
   const mapKey = "b8e921b16722e026a1b2d9e532b77706"; // API key, should hide in .env
-  const mapRef = useRef(null);
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  // const mapRef = useRef(null);
+  // const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
   const [data, setData] = useState([]);
@@ -136,7 +137,8 @@ export default function Home() {
       const url = `/ExternalAPI/api/WeatherDesTMD`;
       console.log("7daysForecast API Request URL:", url);
 
-      const response = await axios.get(url);
+      // const response = await axios.get(url);
+      const response = await fetch(url);
 
       if (response.status === 200) {
         const result = response.data;
@@ -184,16 +186,21 @@ export default function Home() {
     W: "ภาคตะวันตก",
   };
 
-  const initMap = () => {
-    map.Layers.setBase(longdo.Layers.NORMAL);
-    map.location({ lon: 100.5018, lat: 13.7563 }, true);
+  const onMapInit = (mapInstance) => {
+    mapInstance.Layers.setBase(longdo.Layers.NORMAL);
+    mapInstance.location({ lon: 100.5018, lat: 13.7563 }, true);
     map.zoom(6, true);
 
     const regions = [
       {
         title: "ภาคเหนือ",
         detail: "พื้นที่ภาคเหนือของประเทศไทย",
-        location: { lon: 99.1508, lat: 18.7877 },
+        location: { lon: 99.139, lat: 18.794 },
+      },
+      {
+        title: "ภาคตะวันออกเฉียงเหนือ",
+        detail: "พื้นที่ภาคตะวันออกเฉียงเหนือของประเทศไทย",
+        location: { lon: 102.119, lat: 15.229 },
       },
       {
         title: "ภาคกลาง",
@@ -201,43 +208,25 @@ export default function Home() {
         location: { lon: 100.5018, lat: 13.7563 },
       },
       {
-        title: "ภาคอีสาน",
-        detail: "พื้นที่ภาคอีสานของประเทศไทย",
-        location: { lon: 102.0975, lat: 15.2294 },
-      },
-      {
         title: "ภาคตะวันออก",
         detail: "พื้นที่ภาคตะวันออกของประเทศไทย",
-        location: { lon: 101.3565, lat: 12.78 },
+        location: { lon: 101.545, lat: 13.479 },
       },
       {
         title: "ภาคตะวันตก",
         detail: "พื้นที่ภาคตะวันตกของประเทศไทย",
-        location: { lon: 99.797974, lat: 11.81136 },
+        location: { lon: 99.491, lat: 13.547 },
       },
       {
         title: "ภาคใต้",
         detail: "พื้นที่ภาคใต้ของประเทศไทย",
-        location: { lon: 100.2939, lat: 7.0083 },
+        location: { lon: 99.438, lat: 7.536 },
       },
     ];
 
     regions.forEach((region) => {
-      map.Overlays.add(
-        new longdo.Marker(region.location, {
-          title: region.title,
-          detail: region.detail,
-          popup: { message: `${region.title}: ${region.detail}` },
-        })
-      );
+      mapInstance.Overlays.add(new longdo.Marker(region.location, { title: region.title, detail: region.detail, icon: region.icon }));
     });
-  };
-
-  const zoomToRegion = (lat, lng) => {
-    if (mapRef.current) {
-      map.location({ lon: lng, lat: lat }, true);
-      map.zoom(10, true);
-    }
   };
 
   return (
@@ -409,12 +398,7 @@ export default function Home() {
 
           <div className="flex flex-col items-end border w-[50%] mr-[1rem]">
             <h3 className="text-[2rem] mr-[1rem] font-bold">ประเทศไทย</h3>
-            <LongdoMap
-              id="longdo-map"
-              mapKey={mapKey}
-              callback={initMap}
-              ref={mapRef}
-            />
+            <LongdoMap id="homeMap" mapKey={mapKey} onMapInit={onMapInit} />
           </div>
         </div>
       </div>

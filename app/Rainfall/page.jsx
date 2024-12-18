@@ -73,18 +73,8 @@ export default function page() {
             setProvince(nearest.name); // อัปเดตจังหวัด
             setRegion(nearest.region); // อัปเดตภาค
           }
-          console.log(
-            "จังหวัดที่ใกล้ที่สุด:",
-            nearest.name,
-            "\ntype:",
-            typeof nearest.name
-          );
-          console.log(
-            "ภาคที่ใกล้ที่สุด:",
-            nearest.region,
-            "\ntype:",
-            typeof nearest.region
-          );
+          // console.log("จังหวัดที่ใกล้ที่สุด:", nearest.name, "\ntype:", typeof nearest.name);
+          // console.log("ภาคที่ใกล้ที่สุด:", nearest.region, "\ntype:", typeof nearest.region);
         },
         (error) => {
           console.error("Error getting location:", error.message);
