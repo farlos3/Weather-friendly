@@ -9,7 +9,9 @@ import Navbar from "../components/Navbar";
 import { longdo, map, LongdoMap } from "../components/LongdoMap";
 import Dropdown from "../components/Dropdown";
 
-{ /* ---------------------------- Token and State login  ---------------------------- */ }
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
 import {
@@ -20,7 +22,9 @@ import {
   removeTokenExpiry,
 } from "../utils/auth";
 import { useRouter } from "next/navigation";
-{ /* ---------------------------- Token and State login  ---------------------------- */ }
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
 import { Cloud, CloudRain, Sun } from "lucide-react";
 import axios from "axios";
 
@@ -45,7 +49,7 @@ export default function Home() {
       console.log("Already Token");
     } else {
       console.log("Not yet Token");
-    } 
+    }
     // console.log("token: ", token);
   }, []);
 
@@ -250,8 +254,15 @@ export default function Home() {
               src="/img/Account-Icon.png"
               alt="Profile"
               className="w-8 h-8 rounded-full cursor-pointer"
+              onClick={handleProfileClick}
             />
-            <ProfilePopup isVisible={true} onLogout={handleLogout} />
+            <div className="absolute top-full right-0">
+              <ProfilePopup
+                isVisible={isProfilePopupVisible}
+                onClose={() => setIsProfilePopupVisible(false)}
+                onLogout={handleLogout}
+              />
+            </div>
           </div>
         ) : (
           <RegisterButton />
