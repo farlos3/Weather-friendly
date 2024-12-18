@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 export default function page() {
   {/* ---------------------------- Set Token  ---------------------------- */}
   const router = useRouter();
+  const [isLoginPopupVisible, setIsLoginPopupVisible] = useState(false);
 
   // State login
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -42,6 +43,16 @@ export default function page() {
   const handleProfileClick = () => {
     setIsProfilePopupVisible(!isProfilePopupVisible);
   };
+
+  const showLoginPopup = () => {
+    setIsLoginPopupVisible(true);
+  };
+
+  const closeLoginPopup = () => {
+    setIsLoginPopupVisible(false);
+  };
+
+  
 {/* ---------------------------- Set Token  ---------------------------- */}
 
 const mapKey = process.env.NEXT_PUBLIC_LONGDO_MAP_KEY; // API Key จาก Longdo
@@ -79,7 +90,6 @@ useEffect(() => {
 }, [mapKey]);
 
 
-
   return (
     <main className="flex flex-col h-screen h-full w-full bg-gradient-to-bl from-[#0D1E39] via-[#112F5E] to-[#0D1E39] text-white">
       <div className="flex justify-between border items-center">
@@ -105,7 +115,7 @@ useEffect(() => {
           <RegisterButton />
         )}
       </div>
-{/* ---------------------------- Token and State login  ---------------------------- */}
+      {/* ---------------------------- Token and State login  ---------------------------- */}
 
       <section className="flex h-full w-full max-[100%]">
         <Navbar />
@@ -128,7 +138,13 @@ useEffect(() => {
               <section className="flex justify-center mt-4">
                 <button
                   className="flex items-center bg-[#0A1931] px-4 py-3 rounded-full text-white font-semibold hover:bg-[#112F5E] transition"
-                  onClick={() => alert("กำลังหาตำแหน่งปัจจุบัน...")}//ต้องเปลี่ยนเป้นให้ลอคอิน
+                  onClick={() => {
+                    if (!isLoggedIn) {
+                      showLoginPopup(); // แสดงป๊อปอัพหากยังไม่ได้ล็อกอิน
+                    } else {
+                      alert("กำลังหาตำแหน่งปัจจุบัน...");
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-center bg-white rounded-full h-8 w-8 mr-2">
                     <img
@@ -144,6 +160,24 @@ useEffect(() => {
           </section>
         </div>
       </section>
+      {isLoginPopupVisible && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 text-center w-96">
+            <h2 className="text-xl text-gray-700 font-semibold mb-4">
+              โปรดเข้าสู่ระบบ
+            </h2>
+            <p className="text-gray-700 mb-6">
+              เพื่อทราบตำแหน่งของคุณ กรุณาเข้าสู่ระบบ
+            </p>
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition"
+              onClick={closeLoginPopup}
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      )}
       <footer className="mt-auto text-black">
         <Footer />
       </footer>
