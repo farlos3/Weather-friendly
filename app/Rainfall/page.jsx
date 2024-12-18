@@ -174,8 +174,8 @@ export default function page() {
 
       <div className="flex h-full">
         <Navbar />
-        <div className="inline w-full border-4 border-blue-500/75">
-          <div className="flex ml-10 h-[30%] border-4 border-red-500/75">
+        <div className="inline w-full ">
+          <div className="flex ml-10 h-[30%] ">
             <div className="w-[30%] p-4">
               <h1 className="text-[2.5rem] font-bold">ปริมาณฝน</h1>
               <Datetime />
@@ -225,7 +225,7 @@ export default function page() {
             </div>
           </div>
 
-          <div className="flex items-center ml-[2.5rem] h-[70%] gap-x-4 border-4 border-red-500">
+          <div className="flex items-center ml-[2.5rem] h-[70%] gap-x-4">
             {rainfallData?.WeatherForecasts?.[0]?.forecasts
               ?.slice(1, 6) // เริ่มจากวันถัดไป
               .map((item, index) => {
