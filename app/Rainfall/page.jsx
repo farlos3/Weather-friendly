@@ -261,6 +261,7 @@ export default function page() {
               <RelativeHumidityChart
                 forecasts={rainfallData?.WeatherForecasts?.[0]?.forecasts || []}
                 timeRange={timeRange}
+                
               />
             </div>
           </div>
