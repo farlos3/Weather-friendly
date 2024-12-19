@@ -31,9 +31,7 @@ import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
-  const mapKey = "b8e921b16722e026a1b2d9e532b77706"; // API key, should hide in .env
-  // const mapRef = useRef(null);
-  // const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const mapKey = "b8e921b16722e026a1b2d9e532b77706";
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
   const [data, setData] = useState([]);
