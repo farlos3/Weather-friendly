@@ -164,8 +164,8 @@ export default function page() {
 
       <div className="flex h-full">
         <Navbar />
-        <div className="inline w-full border-4 border-blue-500/75">
-          <div className="flex ml-10 h-[30%] border-4 border-red-500/75">
+        <div className="inline w-full ">
+          <div className="flex ml-10 h-[30%] ">
             <div className="w-[30%] p-4">
               <h1 className="text-[2.5rem] font-bold">ปริมาณฝน</h1>
               <Datetime />
@@ -176,28 +176,48 @@ export default function page() {
                 id="timeRange"
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
+                className="px-4 py-2 rounded-md bg-yellow-300 focus:outline-none"
               >
                 <option value="daily">รายวัน</option>
                 <option value="hourly">รายชั่วโมง</option>
               </select>
             </div>
 
-            <div className="border-4 border-indigo-500/75 w-[70%] h-full">
+            <div className="flex-1 h-full mx-6 p-4 space-y-4 flex flex-col items-center justify-center">
               <h2 className="text-2xl font-semibold">
                 ข้อมูลฝน {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}
               </h2>
               <p>จังหวัดที่เลือก: {province || "ยังไม่เลือก"}</p>
-              <p>
-                ตำแหน่งปัจจุบัน: Latitude: {latitude || "กำลังโหลด..."}{" "}
-                Longitude: {longitude || "กำลังโหลด..."}
-              </p>
+              {rainfallData?.WeatherForecasts?.[0]?.forecasts?.[0] && (
+                <div>
+                  <div>
+                    ปริมาณฝน {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "}
+                    {rainfallData.WeatherForecasts[0].forecasts[0]?.data
+                      ?.rain ?? "ไม่มีข้อมูล"}{" "}
+                    %
+                  </div>
+                  <div>
+                    ความเร็วลม{" "}
+                    {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "}
+                    {rainfallData.WeatherForecasts[0].forecasts[0]?.data
+                      ?.ws10m ?? "ไม่มีข้อมูล"}{" "}
+                    m/s
+                  </div>
+                  <div>
+                    ความชื้นสัมพัทธ์{" "}
+                    {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "}
+                    {rainfallData.WeatherForecasts[0].forecasts[0]?.data?.rh ??
+                      "ไม่มีข้อมูล"}{" "}
+                    %
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center ml-[2.5rem] h-[70%] gap-x-4 border-4 border-red-500">
-            {/* วนซ้ำ forecasts */}
+          <div className="flex items-center ml-[2.5rem] h-[70%] gap-x-4">
             {rainfallData?.WeatherForecasts?.[0]?.forecasts
-              ?.slice(1, 7)
+              ?.slice(1, 6) // เริ่มจากวันถัดไป
               .map((item, index) => {
                 const { data } = item;
                 const { rain, ws10m, rh } = data || {};
@@ -205,7 +225,7 @@ export default function page() {
                 return (
                   <div
                     key={index}
-                    className="w-[20%] h-[70%] border-4 border-yellow-500 flex flex-col justify-center p-2"
+                    className="w-[20%] h-[70%] bg-white p-3 rounded-md flex flex-col justify-center p-2"
                   >
                     <div>
                       ปริมาณฝน{" "}
@@ -227,10 +247,11 @@ export default function page() {
               })}
 
             {/* ส่วนแสดงกราฟ */}
-            <div className="w-full h-[70%] border-4 border-yellow-500 flex justify-center items-center">
+            <div className="w-full h-[70%] bg-white p-3 rounded-md flex justify-center items-center">
               <RelativeHumidityChart
                 forecasts={rainfallData?.WeatherForecasts?.[0]?.forecasts || []}
                 timeRange={timeRange}
+                
               />
             </div>
           </div>
