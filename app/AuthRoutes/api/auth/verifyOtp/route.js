@@ -3,77 +3,82 @@ import jwt from "jsonwebtoken";
 import { connectMongoDB } from "@/lib/mongodb";
 import User from "@/app/models/user";
 
-var otpCache = {}; // Temporary OTP storage
+let otpCache = {};
+
+async function handleStoreOtp(email, otp) {
+    const expiresAt = Date.now() + 5 * 60 * 1000; // OTP expires in 5 minutes
+    otpCache[email] = { ...otpCache[email], loginOtp: { otp, expiresAt } };
+
+    console.log(`Login OTP stored for ${email}:`, otpCache[email].loginOtp);
+    return NextResponse.json({ success: true, message: "Login OTP stored successfully." }, { status: 200 });
+}
+
+async function handleVerifyOtp(email, otp) {
+    // Add the client's OTP to otpCache
+    otpCache[email] = { ...otpCache[email], clientOtp: otp };
+
+    console.log(`Client OTP for ${email}:`, otpCache[email].clientOtp);
+
+    const { loginOtp, clientOtp } = otpCache[email] || {};
+
+    // console.log("loginOtp: ", typeof loginOtp);
+    // console.log("loginOtp.otp: ", typeof loginOtp.otp);
+    // console.log("clientOtp: ", typeof Number(clientOtp));
+
+    if (loginOtp.otp === Number(clientOtp)) {
+
+        if (Date.now() > loginOtp.expiresAt) {
+            delete otpCache[email]; // Remove expired OTPs
+            return NextResponse.json({ success: false, message: "OTP expired." }, { status: 400 });
+        }
+
+        await connectMongoDB();
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return NextResponse.json({ message: "User not found." }, { status: 404 });
+        }
+
+        // Generate token
+        const token = jwt.sign(
+            { id: user._id, email: user.email },
+            process.env.SECRET_KEY || "default_secret",
+            { expiresIn: "1h" }
+        );
+
+        delete otpCache[email]; // Remove OTP after successful verification
+
+        return NextResponse.json({
+            success: true,
+            message: "OTP verified successfully.",
+            token: token,
+        }, { status: 200 });
+    } else {
+        return NextResponse.json({ success: false, message: "Invalid OTP." }, { status: 400 });
+    }
+}
 
 export async function POST(req) {
     try {
-        const { email, otp } = await req.json();
-        console.log("\nRequest Data:", { email, otp });
-        console.log("Email:", email, ", Type of Email:", typeof email);
+        const { email, otp, action } = await req.json();
 
-        console.log("\nOTP Cache before retrieval:", otpCache);
-        const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes 
-        otpCache[email] = { otp, expiresAt };
-
-        console.log("OTP Cache after retrieval:", otpCache);
-
-        const cacheEntry = otpCache[email];
-
-        if (!cacheEntry) {
-            console.log(`OTP not found for email: ${email}\n`);
-            return NextResponse.json({
-                success: false,
-                error: "OTP expired or not found."
-            }, { status: 400 });
+        console.log("Request Data:", { email, otp, action });
+        if (!email || !otp || !action) {
+            return NextResponse.json({ message: "Email, OTP, and Action are required." }, { status: 400 });
         }
 
-        // Check if OTP has expired
-        if (Date.now() > cacheEntry.expiresAt) {
-            delete otpCache[email]; // Remove expired OTP
-            return NextResponse.json({
-                success: false,
-                error: "OTP expired."
-            }, { status: 400 });
-        }
+        switch (action) {
+            case "store":
+                return await handleStoreOtp(email, otp);
 
-        // Verify OTP by comparing with the stored OTP
-        if (cacheEntry.otp === otp) {
-            await connectMongoDB();
-            const user = await User.findOne({ email });
+            case "verify":
+                return await handleVerifyOtp(email, otp);
 
-            // Generate token
-            if (!process.env.SECRET_KEY) {
-                console.error("SECRET_KEY is missing in environment variables");
-                return NextResponse.json(
-                    { message: "Server configuration error. Please contact support." },
-                    { status: 500 }
-                );
-            }
-
-            const token = jwt.sign({
-                    id: user._id,
-                    email: user.email 
-                }, process.env.SECRET_KEY, { expiresIn: '1h' });
-
-            // Clear OTP after verification
-            delete otpCache[email];
-
-            return NextResponse.json({
-                success: true,
-                message: "OTP verified.",
-                token: token // Send token directly in response
-            }, { status: 200 });
-        } else {
-            return NextResponse.json({
-                success: false,
-                error: "Invalid OTP."
-            }, { status: 400 });
+            default:
+                return NextResponse.json({ message: "Invalid action." }, { status: 400 });
         }
     } catch (error) {
-        console.error("Error:", error);
-        return NextResponse.json({
-            success: false,
-            error: error.message
-        }, { status: 500 });
+        console.error("Error in verifyOtp:", error.message);
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 }

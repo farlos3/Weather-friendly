@@ -60,7 +60,7 @@ export default function RegisterPage() {
       const res = await fetch("/AuthRoutes/api/auth/verifyOtp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ email, otp, action: "verify" }),
       });
 
       if (res.ok) {
