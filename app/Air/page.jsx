@@ -3,6 +3,7 @@
 import Navbar from "../components/Navbar";
 import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
+import Footer from "../components/Footer";
 import "/app/globals.css";
 import { findNearestProvince } from "../utils/findNearestProvince";
 import AirQualityList from "../utils/AirQualityList";
@@ -177,8 +178,10 @@ export default function Page() {
             <p>แย่</p>
           </div>
 
-          <div className="air-quality-section">
-            <div className="overflow-y-auto max-h-[500px] border rounded-lg p-4">
+          {/* serchbar*/}
+
+          <div className="bg-yellow-300 rounded-lg  w-full space-y-4 overflow-y-auto max-h-[500px]  rounded-lg p-4">
+            <div className=" justify-between bg-white p-4 rounded-md">
               {isLoggedIn ? (
                 <ProvinceAirQualityList
                   airQualityData={airQualityData}
@@ -196,6 +199,9 @@ export default function Page() {
           </div>
         </aside>
       </section>
+      <footer className="mt-auto">
+        <Footer />
+      </footer>
     </div>
   );
 }
