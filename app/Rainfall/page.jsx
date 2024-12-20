@@ -142,7 +142,7 @@ export default function page() {
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
-            <p>Welcome</p>
+            <p>ยินดีต้อนรับ</p>
             <img
               src="/img/Account-Icon.png"
               alt="Profile"

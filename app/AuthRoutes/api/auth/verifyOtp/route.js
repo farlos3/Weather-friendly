@@ -46,6 +46,8 @@ async function handleVerifyOtp(email, otp) {
             { expiresIn: "1h" }
         );
 
+        console.log(first)
+
         delete otpCache[email]; // Remove OTP after successful verification
 
         return NextResponse.json({

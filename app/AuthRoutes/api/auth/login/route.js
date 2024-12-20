@@ -16,7 +16,7 @@ export async function POST(request) {
         await connectMongoDB();
 
         const user = await User.findOne({ email });
-        const modifiedPassword = '123' + password + "456"; // เพิ่ม prefix และ suffix
+        const modifiedPassword = "123" + password + "456"; // เพิ่ม prefix และ suffix
 
         if (!user) {
             return NextResponse.json({ message: "Account does not exist." }, { status: 404 });

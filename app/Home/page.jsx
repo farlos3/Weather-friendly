@@ -49,7 +49,7 @@ export default function Home() {
     } else {
       console.log("Not yet Token");
     }
-    // console.log("token: ", token);
+    console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
@@ -236,7 +236,7 @@ export default function Home() {
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
-            <p>Welcome</p>
+            <p>ยินดีต้อนรับ</p>
             <img
               src="/img/Account-Icon.png"
               alt="Profile"

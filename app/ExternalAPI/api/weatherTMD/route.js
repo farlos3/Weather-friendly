@@ -8,7 +8,7 @@ export async function GET(request) {
   const lon = searchParams.get('lon');  // รับค่าพิกัด lon
   const timeRange = searchParams.get('timeRange'); // รับ timeRange (hourly/daily)
   const TMD_ACCESS_TOKEN = process.env.TMD_ACCESS_TOKEN;
-หิ
+
   // เช็คหากไม่มีทั้ง province และ lat, lon
   if (!province && !region && (!lat || !lon)) {
     return NextResponse.json(
