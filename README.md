@@ -34,4 +34,4 @@ NEXT_PUBLIC_LONGDO_MAP_KEY=<api-key-longdomap>
 ## Start the Project
 Once the .env file is configured, start the development server:
 ```npm run dev```
-The application will be available at http://localhost:3000.
+The application will be available at ```http://localhost:3000```
