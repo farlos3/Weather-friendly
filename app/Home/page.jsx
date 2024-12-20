@@ -6,7 +6,7 @@ import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import LongdoMap , { longdo, map } from "../components/LongdoMap";
+import LongdoMap, { longdo, map } from "../components/LongdoMap";
 import Dropdown from "../components/Dropdown";
 import { Cloud, CloudRain, Sun } from "lucide-react";
 // import axios from "axios";
@@ -25,6 +25,7 @@ import {
   removeTokenExpiry,
 } from "../utils/auth";
 import { useRouter } from "next/navigation";
+import SevenDaysForecast from "../components/SevenDaysForecast";
 {
   /* ---------------------------- Token and State login  ---------------------------- */
 }
@@ -223,7 +224,13 @@ export default function Home() {
     ];
 
     regions.forEach((region) => {
-      mapInstance.Overlays.add(new longdo.Marker(region.location, { title: region.title, detail: region.detail, icon: region.icon }));
+      mapInstance.Overlays.add(
+        new longdo.Marker(region.location, {
+          title: region.title,
+          detail: region.detail,
+          icon: region.icon,
+        })
+      );
     });
   };
 
@@ -232,7 +239,7 @@ export default function Home() {
       className="bg-cover bg-center w-full h-screen flex flex-col"
       style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
     >
-      <div className="flex justify-between items-center border-b">
+      <div className="flex justify-between items-center">
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
@@ -259,7 +266,7 @@ export default function Home() {
       <div className="flex h-full">
         <Navbar />
         <div className="flex justify-between w-full">
-          <div className="ml-10 w-full border border-cyan-800">
+          <div className="ml-10 w-full">
             <Datetime />
             <Dropdown
               isLoggedIn={isLoggedIn}
@@ -271,13 +278,16 @@ export default function Home() {
               setRegion={setRegion}
               zoomToRegion={(regionKey) =>
                 console.log("Zooming to:", regionKey)
-              } // Optional
+              }
             />
 
-            <div className="flex flex-wrap w-full h-[25%] border">
+            <div className="flex flex-wrap w-[90%] h-[25%]">
               {/* การ์ด "วันนี้" */}
-              <div className="h-full w-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex items-center justify-around border border-blue-500">
-                <div className="text-5xl text-gray-600 font-medium">วันนี้</div>
+              <div className="h-full w-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex items-center justify-around hover:bg-gradient-to-b hover:from-blue-200 hover:to-blue-300 hover:shadow-xl transition duration-300 pl-2 pr-2">
+                <div className="text-5xl text-gray-600 font-medium space-y-3">
+                  <div>วันนี้</div>
+                  <div className="text-xl">อากาศหนาว โปรดสวมใส่เสื้อกันหนาว</div>
+                  </div>
 
                 <div>
                   {getWeatherIcon(
@@ -319,7 +329,7 @@ export default function Home() {
               </div>
 
               {/* การ์ด 6 วันถัดไป */}
-              <div className="flex flex-wrap mt-3 gap-x-1 w-full justify-around border border-red-500">
+              <div className="flex flex-wrap mt-3 gap-x-1 w-full justify-around ">
                 {data[0]?.forecasts.slice(1, 7).map((item, index) => {
                   const { time, data } = item;
                   const { tc, ws10m, rh, rain } = data || {};
@@ -327,7 +337,7 @@ export default function Home() {
                   return (
                     <div
                       key={index}
-                      className="w-[15%] h-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex flex-col items-center justify-center gap-y-1 pt-2 pb-2"
+                      className="w-[15%] h-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex flex-col items-center justify-center gap-y-1 pt-2 pb-2 hover:bg-gradient-to-b hover:from-blue-200 hover:to-blue-300 hover:shadow-xl transition duration-300"
                     >
                       <div className="text-gray-600 text-[1rem]">
                         {time
@@ -361,7 +371,8 @@ export default function Home() {
                   );
                 })}
               </div>
-              {sevenDaysForecastData ? (
+              <SevenDaysForecast/>
+              {/* {sevenDaysForecastData ? (
                 <div className="space-y-4">
                   <h3 className="text-xl font-bold">พยากรณ์อากาศรวม 7 วัน</h3>
                   <div className="text-gray-700 text-sm">
@@ -390,11 +401,11 @@ export default function Home() {
                 </div>
               ) : (
                 <p className="text-gray-500">กำลังโหลดข้อมูล...</p>
-              )}
+              )} */}
             </div>
           </div>
 
-          <div className="flex flex-col items-end border w-[50%] mr-[1rem]">
+          <div className="flex flex-col items-end w-[50%] mr-[1rem]">
             <h3 className="text-[2rem] mr-[1rem] font-bold">ประเทศไทย</h3>
             <LongdoMap id="homeMap" mapKey={mapKey} onMapInit={onMapInit} />
           </div>

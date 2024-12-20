@@ -14,8 +14,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const [otp, setOtp] = useState(""); // สำหรับเก็บ OTP
-  const [isOtpSent, setIsOtpSent] = useState(false); // เช็คว่า OTP ถูกส่งแล้วหรือยัง
+  const [otp, setOtp] = useState(""); 
+  const [isOtpSent, setIsOtpSent] = useState(false); 
 
   const redirectTo = searchParams.get("redirect") || "/";
 

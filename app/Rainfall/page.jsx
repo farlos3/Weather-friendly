@@ -164,8 +164,7 @@ export default function page() {
 
         if (isLoggedIn && province) {
           // กรณีล็อกอิน: ใช้จังหวัดที่เลือก
-          url = `RegionForecast
-`;
+          url = `/ExternalAPI/api/weatherTMD?lat=${lat}&lon=${lon}&timeRange=${timeRange}`;
           console.log("API Request URL:", url);
         } else if (!isLoggedIn && region) {
           // กรณีไม่ได้ล็อกอิน: ใช้ข้อมูลพิกัดของภาค
@@ -204,7 +203,7 @@ export default function page() {
       className="w-full h-screen flex flex-col bg-cover"
       style={{ backgroundImage: styles.backgroundImage }}
     >
-      <div className="flex justify-between items-center border">
+      <div className="flex justify-between items-center">
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
@@ -230,14 +229,13 @@ export default function page() {
 
       <div className="flex h-full">
         <Navbar />
-        <div className="inline w-full ">
-          <div className="flex ml-10 h-[30%] ">
-            <div className="w-[30%] p-4 space-y-2">
+        <div className="inline w-full">
+          <div className="flex ml-10 h-[30%]">
+            <div className="w-[30%] space-y-2">
               <h1 className="text-[2.5rem] font-bold">ปริมาณฝน</h1>
               <Datetime />
               <p className="text-[1.5rem]">{isLoggedIn ? province : region}</p>
 
-              {/* เลือกช่วงเวลา */}
               <select
                 id="timeRange"
                 value={timeRange}
@@ -249,7 +247,6 @@ export default function page() {
               </select>
             </div>
 
-            {/* ---------------------------- Style Data  ---------------------------- */}
             <div className="flex h-full text-[16pt] items-start justify-around w-[60%] mt-[2rem]">
               <h2 className="text-3xl font-semibold w-[50%] flex flex-col items-center">
                 ข้อมูลฝน{timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}
@@ -264,10 +261,8 @@ export default function page() {
                 </div>
                 {rainfallData?.WeatherForecasts?.[0]?.forecasts?.[0] && (
                   <div className="h-full space-y-4">
-                    <div className="flex text-[2rem] items-center]">
-                      {/* ปริมาณฝน */}
+                    <div className="flex text-[2rem] items-center">
                       ปริมาณฝน
-                      {/* {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"} :{" "} */}
                       <div className="font-bold ml-3">
                         {rainfallData.WeatherForecasts[0].forecasts[0]?.data
                           ?.rain ?? "ไม่มีข้อมูล"}{" "}
@@ -276,7 +271,6 @@ export default function page() {
                     </div>
                     <div className="flex">
                       <div className="flex w-[50%] items-center pr-2">
-                        {/* {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}*/}{" "}
                         <img
                           src="/img/wind.png"
                           className="w-[3rem] h-[2rem] mr-4"
@@ -284,58 +278,53 @@ export default function page() {
                         {rainfallData.WeatherForecasts[0].forecasts[0]?.data
                           ?.ws10m ?? "ไม่มีข้อมูล"}{" "}
                         เมตร/วินาที
-                      </div>{" "}
+                      </div>
                       <div className="w-[0.5%] bg-black"></div>
                       <div className="w-[30%] flex items-center pl-3">
-                        {/* ความชื้นสัมพัทธ์ */}
                         <img
                           src="/img/Humidity.png"
                           className="w-[3rem] h-[3rem] mr-4"
                         />{" "}
-                        {/* {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:*/}{" "}
                         {rainfallData.WeatherForecasts[0].forecasts[0]?.data
                           ?.rh ?? "ไม่มีข้อมูล"}{" "}
                         %
                       </div>
                     </div>
+                    <div>ไม่มีฝนตก</div>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          {/* ---------------------------- Style Data  ---------------------------- */}
 
-          <div className="flex items-center mt-[4rem] ml-[3rem] mr-[3rem] h-[50%] gap-x-4">
+          <div className="flex items-center mt-[5rem] ml-[3rem] mr-[3rem] h-[50%] gap-x-4">
             {rainfallData?.WeatherForecasts?.[0]?.forecasts
-              ?.slice(1, 6) // เริ่มจากวันถัดไป
+              ?.slice(1, 6)
               .map((item, index) => {
                 const { data, time } = item;
                 const { rain, ws10m, rh } = data || {};
 
-                // แปลงเวลาเป็นรูปแบบที่เหมาะสม
                 const formattedTime =
                   timeRange === "hourly"
                     ? new Date(time).toLocaleTimeString("th-TH", {
                         hour: "2-digit",
                         minute: "2-digit",
-                      }) // แสดงชั่วโมง:นาที
+                      })
                     : new Date(time).toLocaleDateString("th-TH", {
                         weekday: "short",
                         day: "numeric",
-                      }); // แสดงวันย่อ.วัน
+                      });
 
                 return (
                   <div
                     key={index}
                     className="w-[20%] h-full bg-white rounded-[2rem] flex flex-col justify-center space-y-3 p-4"
                   >
-                    {/* เพิ่มเวลา */}
                     <div className="text-center text-lg font-bold">
                       {formattedTime}
                       <div className="w-full h-[5%] bg-black"></div>
                     </div>
 
-                    {/* Add weather image */}
                     <div className="flex justify-center">
                       <img
                         src={getWeatherImage(rain)}
@@ -345,7 +334,6 @@ export default function page() {
                     </div>
 
                     <div className="w-full flex justify-between">
-                      {/* {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "} */}
                       <img
                         src="/img/Drizzledark.png"
                         alt=""
@@ -354,13 +342,11 @@ export default function page() {
                       <div className="ml-1">{rain ?? "ไม่มีข้อมูล"} %</div>
                     </div>
 
-                    <div className="w-full flex border justify-between">
+                    <div className="w-full flex justify-between">
                       <img
                         src="/img/wind.png"
                         className="w-5 h-5 object-contain mr-2"
                       />
-                      {/* ความเร็วลม{" "} */}
-                      {/* {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "} */}
                       {ws10m ?? "ไม่มีข้อมูล"} m/s
                     </div>
                     <div className="w-full flex justify-between">
@@ -368,15 +354,12 @@ export default function page() {
                         src="/img/Humidity.png"
                         className="w-5 h-5 object-contain mr-2"
                       />
-                      {/* ความชื้นสัมพัทธ์{" "} */}
-                      {/* {timeRange === "hourly" ? "รายชั่วโมง" : "รายวัน"}:{" "} */}
                       {rh ?? "ไม่มีข้อมูล"} %
                     </div>
                   </div>
                 );
               })}
 
-            {/* ส่วนแสดงกราฟ */}
             <div className="w-[50%] h-full bg-white p-3 rounded-[3rem] flex justify-center items-center">
               <RelativeHumidityChart
                 forecasts={rainfallData?.WeatherForecasts?.[0]?.forecasts || []}

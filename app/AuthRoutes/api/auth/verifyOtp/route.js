@@ -21,9 +21,9 @@ async function handleVerifyOtp(email, otp) {
 
     const { loginOtp, clientOtp } = otpCache[email] || {};
 
-    // console.log("loginOtp: ", typeof loginOtp);
-    // console.log("loginOtp.otp: ", typeof loginOtp.otp);
-    // console.log("clientOtp: ", typeof Number(clientOtp));
+    console.log("loginOtp: ", typeof loginOtp);
+    console.log("loginOtp.otp: ", typeof loginOtp.otp);
+    console.log("clientOtp: ", typeof Number(clientOtp));
 
     if (loginOtp.otp === Number(clientOtp)) {
 
@@ -46,7 +46,7 @@ async function handleVerifyOtp(email, otp) {
             { expiresIn: "1h" }
         );
 
-        console.log(first)
+        
 
         delete otpCache[email]; // Remove OTP after successful verification
 

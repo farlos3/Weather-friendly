@@ -127,7 +127,7 @@ export default function Page() {
       style={{ backgroundImage: "url('/img/AirBackground.gif')" }}
     >
       {/* Header Section */}
-      <div className="flex justify-between items-center p-4 border-b">
+      <div className="flex justify-between items-center p-4">
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
@@ -165,29 +165,27 @@ export default function Page() {
 
           {/* Map Section */}
           <div className="mt-6 flex-grow">
-            <div className="border rounded-lg h-[400px] bg-gray-200">
-              {" "}
-              {/* เพิ่มความสูงจาก h-80 เป็น h-[600px] */}
+            <div className="rounded-lg h-[400px] bg-gray-200">
               <LongdoMap
                 id="homeMap"
                 mapKey={mapKey}
                 onMapInit={onMapInit}
-                className="w-full h-full" /* เพิ่ม className เพื่อให้แน่ใจว่า map ขยายเต็มพื้นที่ container */
+                className="w-full h-full"
               />
             </div>
           </div>
         </section>
 
-        <aside className="w-1/3 p-6 space-y-4 border-l">
+        <aside className="w-1/3 p-6 space-y-4">
           <div className="flex items-center justify-between">
             <p>ดีมาก</p>
             <div className="w-3/4 h-2 bg-gradient-to-r from-green-400 via-yellow-300 to-red-500 rounded-full"></div>
             <p>แย่</p>
           </div>
 
-          {/* serchbar*/}
-          <div className="bg-yellow-300 rounded-lg  w-full space-y-4 overflow-y-auto max-h-[550px]  rounded-lg p-4">
-            <div className=" justify-between bg-white p-4 rounded-md">
+          {/* searchbar */}
+          <div className="bg-yellow-300 rounded-lg w-full space-y-4 overflow-y-auto max-h-[550px] p-4">
+            <div className="justify-between bg-white p-4 rounded-md">
               {isLoggedIn ? (
                 <ProvinceAirQualityList
                   airQualityData={airQualityData}

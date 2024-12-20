@@ -53,10 +53,10 @@ const HealthAdvice = ({ weatherData }) => {
   const advice = getHealthAdvice(weatherData?.data?.tc, weatherData?.data?.rh);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-[50%]">
       {/* Health Advice Section */}
       <div className="bg-blue-50/90 rounded-lg shadow-md">
-        <div className="p-4 border-b border-blue-100">
+        <div className="p-1 border-b border-blue-100">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -93,7 +93,7 @@ const HealthAdvice = ({ weatherData }) => {
             </ul>
           ) : (
             <p className="text-gray-600 text-center p-4">
-              สภาพอากาศเหมาะสม ไม่มีคำแนะนำพิเศษ
+              โปรดระวังเรื่องไข้หวัด เนื่องจากสภาพอากาศเปลี่ยนแปลง
             </p>
           )}
         </div>
@@ -101,7 +101,7 @@ const HealthAdvice = ({ weatherData }) => {
 
       {/* Health Warnings Section */}
       <div className="bg-red-50/90 rounded-lg shadow-md">
-        <div className="p-4 border-b border-red-100">
+        <div className="p-2 border-b border-red-100">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -122,16 +122,16 @@ const HealthAdvice = ({ weatherData }) => {
         </div>
         <div className="p-4">
           <ul className="space-y-3">
-            {weatherData?.data?.tc > 35 && (
+            {weatherData?.data?.tc <= 35 && (
               <>
                 <li className="flex items-start gap-2 p-3 bg-white/50 rounded-lg">
                   <span className="text-red-600">•</span>
-                  <span>อาการวิงเวียนศีรษะ หน้ามืด</span>
+                  <span>หากถูกน้ำที่เย็นจัด ระวังการเกิดตะคริว</span>
                 </li>
-                <li className="flex items-start gap-2 p-3 bg-white/50 rounded-lg">
+                {/* <li className="flex items-start gap-2 p-3 bg-white/50 rounded-lg">
                   <span className="text-red-600">•</span>
-                  <span>ปวดศีรษะ คลื่นไส้</span>
-                </li>
+                  <span>โปรดระวังเรื่องไข้หวัด เนื่องจากสภาพอากาศเปลี่ยนแปลง</span>
+                </li> */}
                 <li className="flex items-start gap-2 p-3 bg-white/50 rounded-lg">
                   <span className="text-red-600">•</span>
                   <span>ผิวแห้ง กระหายน้ำ</span>
@@ -150,7 +150,7 @@ const HealthAdvice = ({ weatherData }) => {
                 </li>
               </>
             )}
-            {!(weatherData?.data?.tc > 35 || weatherData?.data?.rh > 80) && (
+            {!(weatherData?.data?.tc <= 35 || weatherData?.data?.rh > 80) && (
               <p className="text-gray-600 text-center p-4">
                 ไม่พบความเสี่ยงที่ต้องระวังเป็นพิเศษ
               </p>
@@ -225,7 +225,7 @@ export default function Page() {
       style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
     >
       {/* Header */}
-      <div className="flex justify-between items-center border-b px-4 py-2">
+      <div className="flex justify-between items-center px-4 py-2">
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-4 relative">
@@ -233,7 +233,7 @@ export default function Page() {
             <img
               src="/img/Account-Icon.png"
               alt="Profile"
-              className="w-8 h-8 rounded-full cursor-pointer border-2 border-blue-200 hover:border-blue-400 transition-colors"
+              className="w-8 h-8 rounded-full cursor-pointer hover:border-blue-400 transition-colors"
               onClick={handleProfileClick}
             />
             <div className="absolute top-full right-0 mt-2">
@@ -250,7 +250,7 @@ export default function Page() {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-2 ">
         <Navbar />
         <main className="flex-1 p-6">
           {loading ? (
@@ -258,33 +258,35 @@ export default function Page() {
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
             </div>
           ) : error ? (
-            <div className="text-red-500 text-center p-4">{error}</div>
+            <div className="text-red-500 text-center p-2">{error}</div>
           ) : forecasts.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold text-gray-800">ภาคกลาง</h1>
                 <Datetime />
               </div>
 
               {/* Row with Current Weather and Health Information */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Current Weather */}
                 <div className="lg:col-span-1">
-                  <div className="bg-gradient-to-br from-yellow-100/90 to-yellow-200/90 rounded-2xl p-6 shadow-lg h-full">
-                    <div className="flex flex-col justify-between h-full">
-                      <div>
+                  <div className="bg-gradient-to-br from-yellow-100/90 to-yellow-200/90 rounded-2xl p-6 shadow-lg h-[100%]">
+                    <div className="flex flex-col justify-between h-[50%]">
+                      <div className="flex space-x-10">
                         <p className="text-gray-600 mb-4">
                           {new Date(forecasts[0].time).toLocaleString("th-TH")}
                         </p>
+                        <img src="/img/PartlyCloudy.png" alt="" className="w-[5rem] h-[5rem]" />
                         <div className="text-6xl font-bold text-gray-800 mb-4">
                           {forecasts[0].data.tc}°C
                         </div>
-                        <div className="text-3xl text-gray-600 mb-6">
+                       
+                      </div>
+                      <div className="text-3xl text-gray-600 mb-6">
                           {forecasts[0].data.cond === 1
                             ? "ท้องฟ้าแจ่มใส"
                             : "มีเมฆมาก"}
                         </div>
-                      </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="bg-white/50 rounded-lg p-4">
                           <p className="text-sm text-gray-600">ความชื้น</p>
@@ -310,11 +312,12 @@ export default function Page() {
               </div>
 
               {/* Forecast Cards */}
+              {/* Forecast Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                 {forecasts.slice(1, 7).map((forecast, index) => (
                   <div
                     key={index}
-                    className="bg-white/90 rounded-xl p-4 shadow-md"
+                    className="bg-white/90 rounded-xl p-4 shadow-md transition-transform transform hover:scale-105 hover:shadow-lg"
                   >
                     <p className="text-sm text-gray-600 mb-2">
                       {new Date(forecast.time).toLocaleString("th-TH", {

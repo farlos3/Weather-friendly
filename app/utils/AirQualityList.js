@@ -88,3 +88,5 @@ export default function AirQualityList({ airQualityData, userLat, userLon }) {
         </>
     );
 }
+
+
