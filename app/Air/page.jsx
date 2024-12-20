@@ -5,195 +5,204 @@ import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import "/app/globals.css";
+import { findNearestProvince } from "../utils/findNearestProvince";
+import AirQualityList from "../utils/AirQualityList";
+import ProvinceAirQualityList from "../utils/ProvinceAirQualityList";
 
-{/* ---------------------------- Token and State login  ---------------------------- */}
 import { useEffect, useState } from "react";
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
-import { getToken, setToken, setTokenExpiry, removeToken, removeTokenExpiry, } from "../utils/auth";
+import { getToken, setTokenExpiry, removeToken } from "../utils/auth";
 import { useRouter } from "next/navigation";
-{/* ---------------------------- Token and State login  ---------------------------- */}
+import LongdoMap, { longdo } from "../components/LongdoMap";
 
 export default function Page() {
-  {/* ---------------------------- Set Token  ---------------------------- */}
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // State variables
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
+  const [airQualityData, setAirQualityData] = useState([]);
+  const [province, setProvince] = useState("");
+  const [region, setRegion] = useState("");
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const OPENWEATHER_API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
+  const mapKey = process.env.NEXT_PUBLIC_LONGDO_MAP_KEY;
+
+  // Manage login state
   useEffect(() => {
     const token = getToken();
     if (token) {
       setIsLoggedIn(true);
       setTokenExpiry();
     }
-    console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
     removeToken();
-    console.log("After logout, \ntoken:", getToken());
-
-    setIsLoggedIn(false); // อัปเดตสถานะเป็น Logged out
+    setIsLoggedIn(false);
     router.push("/");
   };
-
-  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
 
   const handleProfileClick = () => {
     setIsProfilePopupVisible(!isProfilePopupVisible);
   };
-{/* ---------------------------- Set Token  ---------------------------- */}
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState("กรุงเทพมหานคร");
+  // Fetch user location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude: lat, longitude: lon } = position.coords;
+          setLatitude(lat);
+          setLongitude(lon);
 
-  const provinces = [
-    "กรุงเทพมหานคร",
-    "สมุทรปราการ",
-    "นนทบุรี",
-    "ปทุมธานี",
-    "นครปฐม",
-    "ชลบุรี",
-    "ระยอง",
-  ];
+          const nearest = findNearestProvince(lat, lon);
 
-  // กรองจังหวัดตามข้อความที่ผู้ใช้พิมพ์
-  const filteredProvinces = provinces.filter((province) =>
-    province.includes(searchText)
-  );
+          if (nearest) {
+            setProvince(nearest.name);
+            setRegion(nearest.region);
+          }
+        },
+        (error) => {
+          console.error("Error getting location:", error.message);
+          setProvince("ไม่สามารถดึงข้อมูลตำแหน่งได้");
+          setRegion("ไม่สามารถระบุภาคได้");
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+      setProvince("ไม่รองรับการดึงตำแหน่ง");
+      setRegion("ไม่รองรับการระบุภาค");
+    }
+  }, []);
 
-  
+  // Fetch air quality data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let url = "";
+
+        if (isLoggedIn && province) {
+          url = `/ExternalAPI/api/Air4Thai?groupType=province}`;
+        } else if (!isLoggedIn && region) {
+          // Fetch region data if not logged in and a region is selected
+          url = `/ExternalAPI/api/Air4Thai?groupType=region`;
+        }
+
+        console.log("Url: ");
+
+        if (url) {
+          const response = await fetch(url);
+          if (response.ok) {
+            const result = await response.json();
+            setAirQualityData(result);
+          } else {
+            console.error("Error fetching data:", response.status);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    // Trigger fetch if either isLoggedIn and province, or not logged in and region is available
+    if ((isLoggedIn && province) || (!isLoggedIn && region)) {
+      fetchData();
+    }
+  }, [isLoggedIn, province, latitude, longitude, region]);
+
+  const onMapInit = (mapInstance) => {
+    mapInstance.Layers.setBase(longdo.Layers.NORMAL);
+    mapInstance.location({ lon: 100.5018, lat: 13.7563 }, true);
+    mapInstance.zoom(6, true);
+  };
+
   return (
     <div
       className="bg-cover bg-center w-full h-screen flex flex-col"
-      style={{ backgroundImage: "url('/img/AirBackground.gif')" }}>
-
-{/* ---------------------------- Token and State login  ---------------------------- */}
-      <div className="flex justify-between items-center p-4 border-b">
+      style={{ backgroundImage: "url('/img/AirBackground.gif')" }}
+    >
+      {/* Header Section */}
+      <div className="flex justify-between items-center p-4">
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
-            <p>Welcome</p>
+            <p>ยินดีต้อนรับ</p>
             <img
               src="/img/Account-Icon.png"
               alt="Profile"
               className="w-8 h-8 rounded-full cursor-pointer"
               onClick={handleProfileClick}
             />
-            <div className="absolute top-full right-0">
+            {isProfilePopupVisible && (
               <ProfilePopup
                 isVisible={isProfilePopupVisible}
                 onClose={() => setIsProfilePopupVisible(false)}
-                onLogout={handleLogout} // ส่งฟังก์ชัน handleLogout ไปที่ ProfilePopup
+                onLogout={handleLogout}
               />
-            </div>
+            )}
           </div>
         ) : (
           <RegisterButton />
         )}
       </div>
-{/* ---------------------------- Token and State login  ---------------------------- */}
 
-      <section className=" border flex h-full w-full max-[100%]">
+      {/* Main Content */}
+      <section className="flex flex-grow">
         <Navbar />
-        <section className="flex-1 border w-full max-[100%] mx-6 ">
-          <header className="border flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">คุณภาพอากาศ</h1>
-              <Datetime />
-              <h2 className="text-2xl ">มจธ, กรุงเทพมหานคร</h2>
-            </div>
+        <section className="flex-1 p-6">
+          <header>
+            <h1 className="text-3xl font-bold">คุณภาพอากาศ</h1>
+            <Datetime />
+            <h2 className="text-2xl">
+              {isLoggedIn ? province : region || "ข้อมูลไม่พร้อมใช้งาน"}
+            </h2>
           </header>
 
-          {/* Dropdowns */}
-          <section className="border flex justify-between items-center mt-4">
-            <div className="flex space-x-4">
-              <select className="px-4 py-2 rounded-md bg-yellow-300 focus:outline-none">
-                <option>PM 2.5</option>
-                <option>PM 10</option>
-                <option>Ozone</option>
-              </select>
-              <select className="px-4 py-2 rounded-md bg-yellow-300 focus:outline-none">
-                <option>รายชั่วโมง</option>
-                <option>รายวัน</option>
-              </select>
-            </div>
-          </section>
-
-          {/* Map */}
-          <section className="mt-6">
-            <div className="border rounded-lg h-80 mb-4 rounded-lg bg-gray-200">
-              <img
-                src="/map-placeholder.png"
-                alt="Map"
-                className="w-full h-full object-cover"
+          {/* Map Section */}
+          <div className="mt-6 flex-grow">
+            <div className="rounded-lg h-[400px] bg-gray-200">
+              <LongdoMap
+                id="homeMap"
+                mapKey={mapKey}
+                onMapInit={onMapInit}
+                className="w-full h-full"
               />
             </div>
-          </section>
+          </div>
         </section>
 
-        <div className=" border h-full max-[100%] mx-6 w-1/3 p-4 space-y-4 ">
-          {/* Legend */}
-          <div className="flex items-center justify-between p-4">
+        <aside className="w-1/3 p-6 space-y-4">
+          <div className="flex items-center justify-between">
             <p>ดีมาก</p>
             <div className="w-3/4 h-2 bg-gradient-to-r from-green-400 via-yellow-300 to-red-500 rounded-full"></div>
             <p>แย่</p>
           </div>
 
-          {/* Search Bar and Dropdown */}
-          <div className="relative">
-            <input
-              type="text"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onFocus={() => setIsDropdownOpen(true)}
-              placeholder="ค้นหาจังหวัด หรือ จุดสถานี"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-            />
-
-            {isDropdownOpen && (
-              <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 max-h-40 overflow-y-auto w-full">
-                {filteredProvinces.map((province, index) => (
-                  <div
-                    key={index}
-                    onClick={() => {
-                      setSelectedProvince(province);
-                      setSearchText(province);
-                      setIsDropdownOpen(false);
-                    }}
-                    className="px-4 py-2 cursor-pointer hover:bg-blue-100"
-                  >
-                    {province}
-                  </div>
-                ))}
-              </div>
-            )}
+          {/* searchbar */}
+          <div className="bg-yellow-300 rounded-lg w-full space-y-4 overflow-y-auto max-h-[550px] p-4">
+            <div className="justify-between bg-white p-4 rounded-md">
+              {isLoggedIn ? (
+                <ProvinceAirQualityList
+                  airQualityData={airQualityData}
+                  userLat={latitude}
+                  userLon={longitude}
+                />
+              ) : (
+                <AirQualityList
+                  airQualityData={airQualityData}
+                  userLat={latitude}
+                  userLon={longitude}
+                />
+              )}
+            </div>
           </div>
-
-          {/* AQI List */}
-          <div className="bg-yellow-300 rounded-lg border w-full p-4 space-y-4 ">
-            {["กรุงเทพมหานคร", "สมุทรปราการ", "นนทบุรี", "ปทุมธานี"].map(
-              (location, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center bg-white p-3 rounded-md"
-                >
-                  <div>
-                    <p className="font-bold text-lg">{location}</p>
-                    <p className="text-sm">PM 2.5: 35 μg/m³</p>
-                    <p className="text-sm">13 ต.ค. 2024 22:00</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-bold text-2xl">70</p>
-                    <p className="text-sm">AQI</p>
-                  </div>
-                </div>
-              )
-            )}
-          </div>
-        </div>
+        </aside>
       </section>
-
       <footer className="mt-auto">
         <Footer />
       </footer>

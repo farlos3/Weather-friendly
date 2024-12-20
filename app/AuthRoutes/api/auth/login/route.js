@@ -16,7 +16,11 @@ export async function POST(request) {
         await connectMongoDB();
 
         const user = await User.findOne({ email });
-        const modifiedPassword = '123' + password + "456"; // เพิ่ม prefix และ suffix
+        const modifiedPassword = "123" + password + "456"; // เพิ่ม prefix และ suffix
+
+        if (!user) {
+            return NextResponse.json({ message: "Account does not exist." }, { status: 404 });
+        }
 
         if (!process.env.SECRET_KEY) {
             console.error("SECRET_KEY is missing in environment variables");
@@ -26,24 +30,15 @@ export async function POST(request) {
             );
         }
 
-
-        if (!user) {
-            return NextResponse.json(
-                { message: "Account does not exist." },
-                { status: 404 }
-            );
-        }
-
         const isPasswordValid = await bcryptjs.compare(modifiedPassword, user.password);
         if (!isPasswordValid) {
-            return NextResponse.json(
-                { message: "Incorrect password." },
-                { status: 401 }
-            );
+            return NextResponse.json({ message: "Incorrect password." }, { status: 401 });
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000);
-        otpCache[email] = { otp };
+        const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes 
+
+        otpCache[email] = { otp, expiresAt };
 
         console.log("Generated OTP:", otp);
         console.log("OTP Cache:", otpCache);
@@ -63,19 +58,21 @@ export async function POST(request) {
             text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
         });
 
-        return NextResponse.json({
-            message: "OTP sent successfully!✅",
-            User: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-            }
-        }, { status: 200 });
+        // Send OTP to verifyOtp API
+        const verifyOtpResponse = await fetch(`http://localhost:3000/AuthRoutes/api/auth/verifyOtp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp, action: "store" }),
+        });        
+
+        if (!verifyOtpResponse.ok) {
+            return NextResponse.json({ message: "Failed to store OTP for verification." }, { status: 500 });
+        }
+
+        return NextResponse.json({ message: "OTP sent successfully!" }, { status: 200 });
 
     } catch (error) {
         console.error("Error during login:", error.message);
-        console.error("Login error:", error);
-
         return NextResponse.json({ message: "An error occurred during login. Please try again." }, { status: 500 });
     }
 }

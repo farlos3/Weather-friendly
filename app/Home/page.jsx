@@ -6,8 +6,15 @@ import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { longdo, map, LongdoMap } from "../components/LongdoMap";
+import LongdoMap, { longdo, map } from "../components/LongdoMap";
 import Dropdown from "../components/Dropdown";
+import { Cloud, CloudRain, Sun } from "lucide-react";
+// import axios from "axios";
+
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
+
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
 import {
@@ -18,14 +25,14 @@ import {
   removeTokenExpiry,
 } from "../utils/auth";
 import { useRouter } from "next/navigation";
-import { Cloud, CloudRain, Sun } from "lucide-react";
-import axios from "axios";
+import SevenDaysForecast from "../components/SevenDaysForecast";
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
 
 export default function Home() {
   const router = useRouter();
-  const mapKey = "b8e921b16722e026a1b2d9e532b77706"; // API key, should hide in .env
-  const mapRef = useRef(null);
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const mapKey = "b8e921b16722e026a1b2d9e532b77706";
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
   const [data, setData] = useState([]);
@@ -33,7 +40,6 @@ export default function Home() {
   const [province, setProvince] = useState("");
   const [region, setRegion] = useState("C");
   const [sevenDaysForecastData, setSevenDaysForecastData] = useState(null);
-
 
   useEffect(() => {
     const token = getToken();
@@ -43,8 +49,8 @@ export default function Home() {
       console.log("Already Token");
     } else {
       console.log("Not yet Token");
-    } 
-    // console.log("token: ", token);
+    }
+    console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
@@ -130,7 +136,8 @@ export default function Home() {
       const url = `/ExternalAPI/api/WeatherDesTMD`;
       console.log("7daysForecast API Request URL:", url);
 
-      const response = await axios.get(url);
+      // const response = await axios.get(url);
+      const response = await fetch(url);
 
       if (response.status === 200) {
         const result = response.data;
@@ -178,16 +185,21 @@ export default function Home() {
     W: "ภาคตะวันตก",
   };
 
-  const initMap = () => {
-    map.Layers.setBase(longdo.Layers.NORMAL);
-    map.location({ lon: 100.5018, lat: 13.7563 }, true);
+  const onMapInit = (mapInstance) => {
+    mapInstance.Layers.setBase(longdo.Layers.NORMAL);
+    mapInstance.location({ lon: 100.5018, lat: 13.7563 }, true);
     map.zoom(6, true);
 
     const regions = [
       {
         title: "ภาคเหนือ",
         detail: "พื้นที่ภาคเหนือของประเทศไทย",
-        location: { lon: 99.1508, lat: 18.7877 },
+        location: { lon: 99.139, lat: 18.794 },
+      },
+      {
+        title: "ภาคตะวันออกเฉียงเหนือ",
+        detail: "พื้นที่ภาคตะวันออกเฉียงเหนือของประเทศไทย",
+        location: { lon: 102.119, lat: 15.229 },
       },
       {
         title: "ภาคกลาง",
@@ -195,43 +207,31 @@ export default function Home() {
         location: { lon: 100.5018, lat: 13.7563 },
       },
       {
-        title: "ภาคอีสาน",
-        detail: "พื้นที่ภาคอีสานของประเทศไทย",
-        location: { lon: 102.0975, lat: 15.2294 },
-      },
-      {
         title: "ภาคตะวันออก",
         detail: "พื้นที่ภาคตะวันออกของประเทศไทย",
-        location: { lon: 101.3565, lat: 12.78 },
+        location: { lon: 101.545, lat: 13.479 },
       },
       {
         title: "ภาคตะวันตก",
         detail: "พื้นที่ภาคตะวันตกของประเทศไทย",
-        location: { lon: 99.797974, lat: 11.81136 },
+        location: { lon: 99.491, lat: 13.547 },
       },
       {
         title: "ภาคใต้",
         detail: "พื้นที่ภาคใต้ของประเทศไทย",
-        location: { lon: 100.2939, lat: 7.0083 },
+        location: { lon: 99.438, lat: 7.536 },
       },
     ];
 
     regions.forEach((region) => {
-      map.Overlays.add(
+      mapInstance.Overlays.add(
         new longdo.Marker(region.location, {
           title: region.title,
           detail: region.detail,
-          popup: { message: `${region.title}: ${region.detail}` },
+          icon: region.icon,
         })
       );
     });
-  };
-
-  const zoomToRegion = (lat, lng) => {
-    if (mapRef.current) {
-      map.location({ lon: lng, lat: lat }, true);
-      map.zoom(10, true);
-    }
   };
 
   return (
@@ -239,11 +239,11 @@ export default function Home() {
       className="bg-cover bg-center w-full h-screen flex flex-col"
       style={{ backgroundImage: "url('/img/backgroundproject.gif')" }}
     >
-      <div className="flex justify-between items-center border-b">
+      <div className="flex justify-between items-center">
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
-            <p>Welcome</p>
+            <p>ยินดีต้อนรับ</p>
             <img
               src="/img/Account-Icon.png"
               alt="Profile"
@@ -266,7 +266,7 @@ export default function Home() {
       <div className="flex h-full">
         <Navbar />
         <div className="flex justify-between w-full">
-          <div className="ml-10 w-full border border-cyan-800">
+          <div className="ml-10 w-full">
             <Datetime />
             <Dropdown
               isLoggedIn={isLoggedIn}
@@ -278,13 +278,16 @@ export default function Home() {
               setRegion={setRegion}
               zoomToRegion={(regionKey) =>
                 console.log("Zooming to:", regionKey)
-              } // Optional
+              }
             />
 
-            <div className="flex flex-wrap w-full h-[25%] border">
+            <div className="flex flex-wrap w-[90%] h-[25%]">
               {/* การ์ด "วันนี้" */}
-              <div className="h-full w-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex items-center justify-around border border-blue-500">
-                <div className="text-5xl text-gray-600 font-medium">วันนี้</div>
+              <div className="h-full w-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex items-center justify-around hover:bg-gradient-to-b hover:from-blue-200 hover:to-blue-300 hover:shadow-xl transition duration-300 pl-2 pr-2">
+                <div className="text-5xl text-gray-600 font-medium space-y-3">
+                  <div>วันนี้</div>
+                  <div className="text-xl">อากาศหนาว โปรดสวมใส่เสื้อกันหนาว</div>
+                  </div>
 
                 <div>
                   {getWeatherIcon(
@@ -326,7 +329,7 @@ export default function Home() {
               </div>
 
               {/* การ์ด 6 วันถัดไป */}
-              <div className="flex flex-wrap mt-3 gap-x-1 w-full justify-around border border-red-500">
+              <div className="flex flex-wrap mt-3 gap-x-1 w-full justify-around ">
                 {data[0]?.forecasts.slice(1, 7).map((item, index) => {
                   const { time, data } = item;
                   const { tc, ws10m, rh, rain } = data || {};
@@ -334,7 +337,7 @@ export default function Home() {
                   return (
                     <div
                       key={index}
-                      className="w-[15%] h-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex flex-col items-center justify-center gap-y-1 pt-2 pb-2"
+                      className="w-[15%] h-full bg-gradient-to-b from-white to-blue-50 rounded-xl shadow-lg flex flex-col items-center justify-center gap-y-1 pt-2 pb-2 hover:bg-gradient-to-b hover:from-blue-200 hover:to-blue-300 hover:shadow-xl transition duration-300"
                     >
                       <div className="text-gray-600 text-[1rem]">
                         {time
@@ -368,7 +371,8 @@ export default function Home() {
                   );
                 })}
               </div>
-              {sevenDaysForecastData ? (
+              <SevenDaysForecast/>
+              {/* {sevenDaysForecastData ? (
                 <div className="space-y-4">
                   <h3 className="text-xl font-bold">พยากรณ์อากาศรวม 7 วัน</h3>
                   <div className="text-gray-700 text-sm">
@@ -397,18 +401,13 @@ export default function Home() {
                 </div>
               ) : (
                 <p className="text-gray-500">กำลังโหลดข้อมูล...</p>
-              )}
+              )} */}
             </div>
           </div>
 
-          <div className="flex flex-col items-end border w-[50%] mr-[1rem]">
+          <div className="flex flex-col items-end w-[50%] mr-[1rem]">
             <h3 className="text-[2rem] mr-[1rem] font-bold">ประเทศไทย</h3>
-            <LongdoMap
-              id="longdo-map"
-              mapKey={mapKey}
-              callback={initMap}
-              ref={mapRef}
-            />
+            <LongdoMap id="homeMap" mapKey={mapKey} onMapInit={onMapInit} />
           </div>
         </div>
       </div>
