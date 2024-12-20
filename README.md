@@ -8,7 +8,7 @@ cd Weather-friendly
 ```
 
 ## Install Dependencies
-Install the required dependencies using npm:
+Install the required dependencies using npm: <br>
 ```npm install```
 
 ## Environment Configuration
