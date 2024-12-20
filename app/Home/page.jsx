@@ -6,15 +6,17 @@ import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import LongdoMap, { longdo, map } from "../components/LongdoMap";
-import Dropdown from "../components/Dropdown";
-import { Cloud, CloudRain, Sun } from "lucide-react";
-// import axios from "axios";
+import LongdoMap ,{ longdo, map } from "../components/LongdoMap";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { Navigation, Pagination } from "swiper";
+
 
 {
   /* ---------------------------- Token and State login  ---------------------------- */
 }
-
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
 import {
@@ -28,17 +30,22 @@ import { useRouter } from "next/navigation";
 {
   /* ---------------------------- Token and State login  ---------------------------- */
 }
+import { Cloud, CloudRain, Sun } from "lucide-react";
+import axios from "axios";
+import SevenDaysForecast from "../components/SevenDaysForecast";
 
 export default function Home() {
   const router = useRouter();
-  const mapKey = "b8e921b16722e026a1b2d9e532b77706";
+  const mapKey = "b8e921b16722e026a1b2d9e532b77706"; // API key, should hide in .env
+  const mapRef = useRef(null);
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
-  const [province, setProvince] = useState("");
+  const [province, setProvince] = useState("กรุงเทพมหานคร");
   const [region, setRegion] = useState("C");
-  const [sevenDaysForecastData, setSevenDaysForecastData] = useState(null);
+  const [sevenDaysForecastData, setSevenDaysForecastData] = useState();
 
   useEffect(() => {
     const token = getToken();
@@ -49,7 +56,7 @@ export default function Home() {
     } else {
       console.log("Not yet Token");
     }
-    console.log("token: ", token);
+    // console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
@@ -87,76 +94,88 @@ export default function Home() {
     return conditionMap[condition] || "ไม่ทราบสถานะ (Unknown)";
   };
 
-  const fetchWeatherData = async () => {
+  const fetchWeatherDataByProvince = async (province) => {
     try {
-      let url = "";
-      const selectedRegion = regionToProvinceMap[region];
-
-      if (isLoggedIn && province) {
-        // ใช้ province ที่เลือกเมื่อ login
-        url = `/ExternalAPI/api/weatherTMD?province=${province}`;
-      } else if (!isLoggedIn && selectedRegion) {
-        // ใช้พิกัดหรือ province ตามภาคที่เลือก
-        const { lat, lon } = selectedRegion;
-        url = `/ExternalAPI/api/weatherTMD?lat=${lat}&lon=${lon}`;
-      }
-
-      console.log("API Request URL:", url);
-
-      if (url) {
-        const response = await fetch(url);
+      const url1 = `/ExternalAPI/api/weatherTMD?province=${province}`;
+      console.log("Province Weather API URL:", url1);
+      const response = await fetch(url1);
+      if (response.ok) {
         const result = await response.json();
-
-        if (response.ok) {
-          // ตรวจสอบว่า result.WeatherForecasts มีข้อมูล 7 วันหรือไม่
-          const forecasts = result.WeatherForecasts?.slice(0, 7) || [];
-          console.log("Forecasts (7 days):", forecasts);
-          setData(forecasts); // เก็บข้อมูล 7 วันใน state
-          setError(null);
-        } else {
-          setError(result.error || "Error fetching data");
-        }
+        setData(result?.WeatherForecasts?.slice(0, 7) || []);
+        setError(null);
+      } else {
+        setError("Failed to fetch province weather data");
       }
     } catch (err) {
-      setError("Failed to fetch weather data");
+      setError("Error fetching province weather data");
+    }
+  };
+
+  const fetchWeatherData = async (lat, lon) => {
+    try {
+      const url = `/ExternalAPI/api/weatherTMD?lat=${lat}&lon=${lon}`;
+      console.log("Region Weather API URL:", url);
+      const response = await fetch(url);
+      if (response.ok) {
+        const result = await response.json();
+        setData(result?.WeatherForecasts?.slice(0, 7) || []);
+        setError(null);
+      } else {
+        setError("Failed to fetch region weather data");
+      }
+    } catch (err) {
+      setError("Error fetching region weather data");
     }
   };
 
   useEffect(() => {
     if (isLoggedIn && province) {
-      fetchWeatherData();
+      fetchWeatherDataByProvince();
     } else if (!isLoggedIn && region) {
       fetchWeatherData();
     }
   }, [province, region]);
 
-  const fetchSevenDaysForecast = async () => {
-    try {
-      const url = `/ExternalAPI/api/WeatherDesTMD`;
-      console.log("7daysForecast API Request URL:", url);
-
-      // const response = await axios.get(url);
-      const response = await fetch(url);
-
-      if (response.status === 200) {
-        const result = response.data;
-        console.log("7daysForecast Data:", result);
-        setSevenDaysForecastData(result); // Store overall forecast in state
-        setError(null);
-      } else {
-        setError("Failed to fetch 7-day forecast data.");
-      }
-    } catch (err) {
-      console.error("Error fetching 7-day forecast:", err);
-      setError("Failed to fetch 7-day forecast.");
-    }
-  };
-
   useEffect(() => {
-    if (!isLoggedIn && region) {
-      fetchSevenDaysForecast();
-    }
-  }, [region, isLoggedIn]);
+    const fetchSevenDaysForecast = async () => {
+      try {
+        const url = `/ExternalAPI/api/WeatherDesTMD`;
+        console.log("7daysForecast API Request URL:", url);
+
+        const response = await fetch(url);
+
+        if (response.status === 200) {
+          const result = await response.json();
+          console.log("7daysForecast Data:", result);
+
+          // แสดงข้อมูล `OverallForecast` ใน console
+          const overallForecast = result?.OverallForecast || {};
+
+          console.log("OverallForecast Date:", overallForecast.Date);
+          console.log(
+            "OverallDescriptionThai:",
+            overallForecast.OverallDescriptionThai,
+            "OveralRegionName :",
+            overallForecast.RegionForecast?.[0].RegionNameThai[0]
+          );
+          console.log(
+            "OverallRegionName ",
+            overallForecast.RegionForecast[1].RegionNameThai
+          );
+
+          setSevenDaysForecastData(result); // เก็บข้อมูลใน state
+          setError(null);
+        } else {
+          setError("Failed to fetch 7-day forecast data.");
+        }
+      } catch (err) {
+        console.error("Error fetching 7-day forecast:", err);
+        setError("Failed to fetch 7-day forecast.");
+      }
+    };
+
+    fetchSevenDaysForecast();
+  }, []);
 
   const regionToProvinceMap = {
     C: { province: "กรุงเทพมหานคร", lat: 13.7563, lon: 100.5018 },
@@ -184,21 +203,16 @@ export default function Home() {
     W: "ภาคตะวันตก",
   };
 
-  const onMapInit = (mapInstance) => {
-    mapInstance.Layers.setBase(longdo.Layers.NORMAL);
-    mapInstance.location({ lon: 100.5018, lat: 13.7563 }, true);
+  const initMap = () => {
+    map.Layers.setBase(longdo.Layers.NORMAL);
+    map.location({ lon: 100.5018, lat: 13.7563 }, true);
     map.zoom(6, true);
 
     const regions = [
       {
         title: "ภาคเหนือ",
         detail: "พื้นที่ภาคเหนือของประเทศไทย",
-        location: { lon: 99.139, lat: 18.794 },
-      },
-      {
-        title: "ภาคตะวันออกเฉียงเหนือ",
-        detail: "พื้นที่ภาคตะวันออกเฉียงเหนือของประเทศไทย",
-        location: { lon: 102.119, lat: 15.229 },
+        location: { lon: 99.1508, lat: 18.7877 },
       },
       {
         title: "ภาคกลาง",
@@ -206,25 +220,43 @@ export default function Home() {
         location: { lon: 100.5018, lat: 13.7563 },
       },
       {
+        title: "ภาคอีสาน",
+        detail: "พื้นที่ภาคอีสานของประเทศไทย",
+        location: { lon: 102.0975, lat: 15.2294 },
+      },
+      {
         title: "ภาคตะวันออก",
         detail: "พื้นที่ภาคตะวันออกของประเทศไทย",
-        location: { lon: 101.545, lat: 13.479 },
+        location: { lon: 101.3565, lat: 12.78 },
       },
       {
         title: "ภาคตะวันตก",
         detail: "พื้นที่ภาคตะวันตกของประเทศไทย",
-        location: { lon: 99.491, lat: 13.547 },
+        location: { lon: 99.797974, lat: 11.81136 },
       },
       {
         title: "ภาคใต้",
         detail: "พื้นที่ภาคใต้ของประเทศไทย",
-        location: { lon: 99.438, lat: 7.536 },
+        location: { lon: 100.2939, lat: 7.0083 },
       },
     ];
 
     regions.forEach((region) => {
-      mapInstance.Overlays.add(new longdo.Marker(region.location, { title: region.title, detail: region.detail, icon: region.icon }));
+      map.Overlays.add(
+        new longdo.Marker(region.location, {
+          title: region.title,
+          detail: region.detail,
+          popup: { message: `${region.title}: ${region.detail}` },
+        })
+      );
     });
+  };
+
+  const zoomToRegion = (lat, lng) => {
+    if (mapRef.current) {
+      map.location({ lon: lng, lat: lat }, true);
+      map.zoom(10, true);
+    }
   };
 
   return (
@@ -236,7 +268,7 @@ export default function Home() {
         <Headlogo />
         {isLoggedIn ? (
           <div className="flex items-center space-x-2 relative">
-            <p>ยินดีต้อนรับ</p>
+            <p>Welcome</p>
             <img
               src="/img/Account-Icon.png"
               alt="Profile"
@@ -256,23 +288,70 @@ export default function Home() {
         )}
       </div>
 
-      <div className="flex h-full">
+      <div className="flex h-full w-full">
         <Navbar />
         <div className="flex justify-between w-full">
-          <div className="ml-10 w-full border border-cyan-800">
+          <div className="ml-10 w-[50%] border border-cyan-800">
             <Datetime />
-            <Dropdown
-              isLoggedIn={isLoggedIn}
-              provinces={provinces}
-              regions={regions}
-              province={province}
-              region={region}
-              setProvince={setProvince}
-              setRegion={setRegion}
-              zoomToRegion={(regionKey) =>
-                console.log("Zooming to:", regionKey)
-              } // Optional
-            />
+            {/* Dropdown for Region/Province Selection */}
+            <select
+              id="locationSelector"
+              value={isLoggedIn ? province || region : region} // แสดงค่าเริ่มต้นตามเงื่อนไขการล็อกอิน
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                if (isLoggedIn) {
+                  if (selectedValue in regions) {
+                    // เมื่อเลือกภูมิภาค
+                    setRegion(selectedValue);
+                    const selectedRegion = regionToProvinceMap[selectedValue];
+                    if (selectedRegion)
+                      fetchWeatherData(selectedRegion.lat, selectedRegion.lon);
+                  } else {
+                    // เมื่อเลือกจังหวัด
+                    setProvince(selectedValue);
+                    fetchWeatherDataByProvince(selectedValue);
+                  }
+                } else {
+                  // กรณียังไม่ได้ล็อกอิน เลือกได้เฉพาะภูมิภาค
+                  setRegion(selectedValue);
+                  const selectedRegion = regionToProvinceMap[selectedValue];
+                  if (selectedRegion)
+                    fetchWeatherData(selectedRegion.lat, selectedRegion.lon);
+                }
+              }}
+              className="px-4 py-2 rounded-md bg-yellow-300 focus:outline-none"
+            >
+              {isLoggedIn ? (
+                // เมื่อผู้ใช้ล็อกอิน สามารถเลือกได้ทั้งภูมิภาคและจังหวัด
+                <>
+                  <option value="" disabled>
+                    เลือกภูมิภาคหรือจังหวัด
+                  </option>
+                  {Object.entries(regions).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))}
+                  {provinces.map((prov) => (
+                    <option key={prov} value={prov}>
+                      {prov}
+                    </option>
+                  ))}
+                </>
+              ) : (
+                // กรณียังไม่ได้ล็อกอิน แสดงเฉพาะตัวเลือกภูมิภาค
+                <>
+                  <option value="" disabled>
+                    เลือกภูมิภาค
+                  </option>
+                  {Object.entries(regions).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
 
             <div className="flex flex-wrap w-full h-[25%] border">
               {/* การ์ด "วันนี้" */}
@@ -361,43 +440,72 @@ export default function Home() {
                   );
                 })}
               </div>
-              {sevenDaysForecastData ? (
-                <div className="space-y-4">
-                  <h3 className="text-xl font-bold">พยากรณ์อากาศรวม 7 วัน</h3>
-                  <div className="text-gray-700 text-sm">
-                    <p className="font-bold">
-                      {sevenDaysForecastData.OverallForecast.Date}
-                    </p>
-                    <p>
-                      {
-                        sevenDaysForecastData.OverallForecast
-                          .OverallDescriptionThai
-                      }
-                    </p>
+              <div className="container mx-auto p-4">
+                {sevenDaysForecastData ? (
+                  <div className="space-y-4">
+                    <h3 className="inline text-xl font-bold">
+                      พยากรณ์อากาศรวม 7 วัน
+                    </h3>
+                    <div className="mt-4">
+                      <Swiper
+                        spaceBetween={20}
+                        slidesPerView={1}
+                        navigation
+                        pagination={{ clickable: true }}
+                        
+                      >
+                        <SwiperSlide>
+                          <div className="p-4 border rounded-lg shadow-sm bg-white">
+                            <div className="mb-4">
+                              <h3 className="font-bold text-lg mb-2">
+                                ภาพรวมการพยากรณ์
+                              </h3>
+                              <p className="text-gray-700">
+                                {sevenDaysForecastData.OverallForecast.Date}
+                              </p>
+                              <p className="text-gray-700">
+                                {
+                                  sevenDaysForecastData.OverallForecast
+                                    .OverallDescriptionThai
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </SwiperSlide>
+                        {sevenDaysForecastData.OverallForecast.RegionForecast.map(
+                          (region, index) => (
+                            <SwiperSlide key={index}>
+                              <div className="p-4 border rounded-lg shadow-sm bg-white">
+                                <h3 className="font-bold text-lg mb-2">
+                                  {region.RegionNameThai}
+                                </h3>
+                                <p className="text-gray-700">
+                                  {region.DescriptionThai}
+                                </p>
+                              </div>
+                            </SwiperSlide>
+                          )
+                        )}
+                      </Swiper>
+                    </div>
                   </div>
-
-                  <div>
-                    <h4 className="text-lg font-semibold">พยากรณ์รายภาค</h4>
-                    {sevenDaysForecastData.OverallForecast.RegionForecast.map(
-                      (region, index) => (
-                        <div key={index} className="mt-2">
-                          <p className="font-bold">{region.RegionNameThai}</p>
-                          <p>{region.DescriptionThai}</p>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-500">กำลังโหลดข้อมูล...</p>
-              )}
+                ) : (
+                  <p className="text-gray-500">กำลังโหลดข้อมูล...</p>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-end border w-[50%] mr-[1rem]">
+          <div className="flex flex-col items-end border w-full">
             <h3 className="text-[2rem] mr-[1rem] font-bold">ประเทศไทย</h3>
-            <LongdoMap id="homeMap" mapKey={mapKey} onMapInit={onMapInit} />
+            <LongdoMap
+              id="longdo-map"
+              mapKey={mapKey}
+              callback={initMap}
+              ref={mapRef}
+            />
           </div>
+
         </div>
       </div>
 

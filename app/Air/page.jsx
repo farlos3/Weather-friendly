@@ -1,213 +1,202 @@
 "use client";
 
-import Navbar from "../components/Navbar";
 import Headlogo from "../components/Headlogo";
 import Datetime from "../components/Datetime";
 import Footer from "../components/Footer";
-import "/app/globals.css";
+import Navbar from "../components/Navbar";
 import { findNearestProvince } from "../utils/findNearestProvince";
-import AirQualityList from "../utils/AirQualityList";
-import ProvinceAirQualityList from "../utils/ProvinceAirQualityList";
 
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
 import { useEffect, useState } from "react";
 import RegisterButton from "../components/RegisterButton";
 import ProfilePopup from "../components/ProfilePopup";
-import { getToken, setTokenExpiry, removeToken } from "../utils/auth";
+import {
+  getToken,
+  setToken,
+  setTokenExpiry,
+  removeToken,
+  removeTokenExpiry,
+} from "../utils/auth";
 import { useRouter } from "next/navigation";
-import LongdoMap, { longdo } from "../components/LongdoMap";
+{
+  /* ---------------------------- Token and State login  ---------------------------- */
+}
 
 export default function Page() {
   const router = useRouter();
-
-  // State variables
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
-  const [airQualityData, setAirQualityData] = useState([]);
-  const [province, setProvince] = useState("");
-  const [region, setRegion] = useState("");
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [province, setProvince] = useState("");
+  const [region, setRegion] = useState("");
+  const [timeRange, setTimeRange] = useState("daily");
+  const [forecasts, setForecasts] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const OPENWEATHER_API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY;
-  const mapKey = process.env.NEXT_PUBLIC_LONGDO_MAP_KEY;
-
-  // Manage login state
   useEffect(() => {
     const token = getToken();
     if (token) {
       setIsLoggedIn(true);
       setTokenExpiry();
+      console.log("Already Token");
+    } else {
+      console.log("Not yet Token");
     }
+    // console.log("token: ", token);
   }, []);
 
   const handleLogout = () => {
     removeToken();
+    console.log("After logout, \ntoken:", getToken());
+
     setIsLoggedIn(false);
     router.push("/");
   };
+
+  const [isProfilePopupVisible, setIsProfilePopupVisible] = useState(false);
 
   const handleProfileClick = () => {
     setIsProfilePopupVisible(!isProfilePopupVisible);
   };
 
-  // Fetch user location
+  {
+    /* ---------------------------- Token and State login  ---------------------------- */
+  }
+
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude: lat, longitude: lon } = position.coords;
-          setLatitude(lat);
-          setLongitude(lon);
+    async function fetchWeather() {
+      try {
+        const province = "กรุงเทพมหานคร";
+        const response = await fetch(
+          `/ExternalAPI/api/healthTMD?province=${encodeURIComponent(province)}`
+        );
 
-          const nearest = findNearestProvince(lat, lon);
-
-          if (nearest) {
-            setProvince(nearest.name);
-            setRegion(nearest.region);
-          }
-        },
-        (error) => {
-          console.error("Error getting location:", error.message);
-          setProvince("ไม่สามารถดึงข้อมูลตำแหน่งได้");
-          setRegion("ไม่สามารถระบุภาคได้");
-        }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-      setProvince("ไม่รองรับการดึงตำแหน่ง");
-      setRegion("ไม่รองรับการระบุภาค");
+        const data = await response.json();
+        setForecasts(data.WeatherForecasts[0]?.forecasts || []);
+      } catch (err) {
+        setError("ไม่สามารถโหลดข้อมูลได้");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    fetchWeather();
   }, []);
 
-  // Fetch air quality data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let url = "";
-
-        if (isLoggedIn && province) {
-          url = `/ExternalAPI/api/Air4Thai?groupType=province}`;
-        } else if (!isLoggedIn && region) {
-          // Fetch region data if not logged in and a region is selected
-          url = `/ExternalAPI/api/Air4Thai?groupType=region`;
-        }
-
-        console.log("Url: ");
-
-        if (url) {
-          const response = await fetch(url);
-          if (response.ok) {
-            const result = await response.json();
-            setAirQualityData(result);
-          } else {
-            console.error("Error fetching data:", response.status);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    // Trigger fetch if either isLoggedIn and province, or not logged in and region is available
-    if ((isLoggedIn && province) || (!isLoggedIn && region)) {
-      fetchData();
-    }
-  }, [isLoggedIn, province, latitude, longitude, region]);
-
-  const onMapInit = (mapInstance) => {
-    mapInstance.Layers.setBase(longdo.Layers.NORMAL);
-    mapInstance.location({ lon: 100.5018, lat: 13.7563 }, true);
-    mapInstance.zoom(6, true);
-  };
-
   return (
-    <div
-      className="bg-cover bg-center w-full h-screen flex flex-col"
-      style={{ backgroundImage: "url('/img/AirBackground.gif')" }}
-    >
-      {/* Header Section */}
-      <div className="flex justify-between items-center p-4 border-b">
-        <Headlogo />
-        {isLoggedIn ? (
-          <div className="flex items-center space-x-2 relative">
-            <p>ยินดีต้อนรับ</p>
-            <img
-              src="/img/Account-Icon.png"
-              alt="Profile"
-              className="w-8 h-8 rounded-full cursor-pointer"
-              onClick={handleProfileClick}
-            />
-            {isProfilePopupVisible && (
-              <ProfilePopup
-                isVisible={isProfilePopupVisible}
-                onClose={() => setIsProfilePopupVisible(false)}
-                onLogout={handleLogout}
-              />
-            )}
-          </div>
-        ) : (
-          <RegisterButton />
-        )}
+    <div className="h-screen bg-[#1a237e] flex">
+      {/* Use existing Navbar component */}
+      <div className="w-24 bg-[#0d1442]">
+        <Navbar />
       </div>
 
       {/* Main Content */}
-      <section className="flex flex-grow">
-        <Navbar />
-        <section className="flex-1 p-6">
-          <header>
-            <h1 className="text-3xl font-bold">คุณภาพอากาศ</h1>
+      <main className="flex-1 p-6">
+        {/* Header with existing components */}
+        <div className="flex justify-between items-center text-white mb-6">
+          <Headlogo />
+          {isLoggedIn ? (
+            <div className="flex items-center space-x-4">
+              <p className="text-sm">ยินดีต้อนรับ</p>
+              <div className="relative">
+                <img
+                  src="/img/Account-Icon.png"
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full cursor-pointer border-2 border-blue-200 hover:border-blue-400 transition-colors"
+                  onClick={handleProfileClick}
+                />
+                <div className="absolute top-full right-0 mt-2">
+                  <ProfilePopup
+                    isVisible={isProfilePopupVisible}
+                    onClose={() => setIsProfilePopupVisible(false)}
+                    onLogout={handleLogout}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <RegisterButton />
+          )}
+        </div>
+
+        {/* Content Area */}
+        <div className="text-white">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">ภาคกลาง</h1>
             <Datetime />
-            <h2 className="text-2xl">
-              {isLoggedIn ? province : region || "ข้อมูลไม่พร้อมใช้งาน"}
-            </h2>
-          </header>
+          </div>
 
-          {/* Map Section */}
-          <div className="mt-6 flex-grow">
-            <div className="border rounded-lg h-[400px] bg-gray-200">
-              {" "}
-              {/* เพิ่มความสูงจาก h-80 เป็น h-[600px] */}
-              <LongdoMap
-                id="homeMap"
-                mapKey={mapKey}
-                onMapInit={onMapInit}
-                className="w-full h-full" /* เพิ่ม className เพื่อให้แน่ใจว่า map ขยายเต็มพื้นที่ container */
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-[400px,1fr] gap-6">
+            {/* Current Weather Card */}
+            <div className="bg-gradient-to-br from-yellow-100/90 to-yellow-200/90 rounded-2xl p-6 text-gray-800">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-5xl font-bold">31°C</div>
+                  <div className="text-3xl mt-2">27°C</div>
+                </div>
+                <img src="/img/partly-cloudy.png" alt="Weather" className="w-24 h-24" />
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="flex items-center space-x-2">
+                  <img src="/img/rain.png" alt="Rain" className="w-6 h-6" />
+                  <span>200 มิลลิเมตร</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img src="/img/sun.png" alt="UV" className="w-6 h-6" />
+                  <span>5</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img src="/img/wind.png" alt="Wind" className="w-6 h-6" />
+                  <span>5 กิโลเมตร/ชั่วโมง</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img src="/img/humidity.png" alt="Humidity" className="w-6 h-6" />
+                  <span>86%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Health Recommendations */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold mb-4 text-blue-300">คำแนะนำด้านสุขภาพ</h2>
+              <div className="bg-white/90 rounded-xl p-4 text-gray-800">
+                <ul className="space-y-2">
+                  <li>1. ควรสวมใส่หน้ากากอนามัยเมื่อออกจากบ้าน</li>
+                  <li>2. ดื่มน้ำมาก ๆ เพื่อรักษาอุณหภูมิในร่างกาย</li>
+                  <li>3. หากมีอาการอ่อนเพลีย ให้หลีกเลี่ยงกิจกรรมกลางแดด</li>
+                </ul>
+              </div>
+
+              <h3 className="font-medium mt-6 mb-2">โปรดระวังอาการเหล่านี้</h3>
+              <div className="flex space-x-4">
+                <div className="bg-white/90 rounded-xl px-4 py-2 text-gray-800">อีสโรค</div>
+                <div className="bg-white/90 rounded-xl px-4 py-2 text-gray-800">ไข้อาทแดด</div>
+                <div className="bg-white/90 rounded-xl px-4 py-2 text-gray-800">มะเร็งผิวหนัง</div>
+              </div>
             </div>
           </div>
-        </section>
 
-        <aside className="w-1/3 p-6 space-y-4 border-l">
-          <div className="flex items-center justify-between">
-            <p>ดีมาก</p>
-            <div className="w-3/4 h-2 bg-gradient-to-r from-green-400 via-yellow-300 to-red-500 rounded-full"></div>
-            <p>แย่</p>
+          {/* Forecast Cards */}
+          <div className="grid grid-cols-4 gap-4 mt-6">
+            {['จันทร์ 14 ตุลาคม 2567', 'อังคาร 15 ตุลาคม 2567', 'พุธ 16 ตุลาคม 2567', 'พฤหัสบดี 17 ตุลาคม 2567'].map((date, index) => (
+              <div key={index} className="bg-white/90 rounded-xl p-4">
+                <p className="text-gray-600 text-sm mb-2">{date}</p>
+                <div className="flex items-center justify-between">
+                  <div className="text-gray-800">
+                    <div className="text-2xl font-bold">32°C</div>
+                    <div className="text-xl">27°C</div>
+                  </div>
+                  <img src="/img/cloudy.png" alt="Weather" className="w-12 h-12" />
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* serchbar*/}
-          <div className="bg-yellow-300 rounded-lg  w-full space-y-4 overflow-y-auto max-h-[550px]  rounded-lg p-4">
-            <div className=" justify-between bg-white p-4 rounded-md">
-              {isLoggedIn ? (
-                <ProvinceAirQualityList
-                  airQualityData={airQualityData}
-                  userLat={latitude}
-                  userLon={longitude}
-                />
-              ) : (
-                <AirQualityList
-                  airQualityData={airQualityData}
-                  userLat={latitude}
-                  userLon={longitude}
-                />
-              )}
-            </div>
-          </div>
-        </aside>
-      </section>
-      <footer className="mt-auto">
-        <Footer />
-      </footer>
+        </div>
+      </main>
     </div>
   );
 }
