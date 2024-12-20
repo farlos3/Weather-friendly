@@ -164,9 +164,16 @@ export default function Page() {
           </header>
 
           {/* Map Section */}
-          <div className="mt-6">
-            <div className="border rounded-lg h-80 bg-gray-200">
-              <LongdoMap id="homeMap" mapKey={mapKey} onMapInit={onMapInit} />
+          <div className="mt-6 flex-grow">
+            <div className="border rounded-lg h-[400px] bg-gray-200">
+              {" "}
+              {/* เพิ่มความสูงจาก h-80 เป็น h-[600px] */}
+              <LongdoMap
+                id="homeMap"
+                mapKey={mapKey}
+                onMapInit={onMapInit}
+                className="w-full h-full" /* เพิ่ม className เพื่อให้แน่ใจว่า map ขยายเต็มพื้นที่ container */
+              />
             </div>
           </div>
         </section>
@@ -179,8 +186,7 @@ export default function Page() {
           </div>
 
           {/* serchbar*/}
-
-          <div className="bg-yellow-300 rounded-lg  w-full space-y-4 overflow-y-auto max-h-[500px]  rounded-lg p-4">
+          <div className="bg-yellow-300 rounded-lg  w-full space-y-4 overflow-y-auto max-h-[550px]  rounded-lg p-4">
             <div className=" justify-between bg-white p-4 rounded-md">
               {isLoggedIn ? (
                 <ProvinceAirQualityList
