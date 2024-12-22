@@ -12,7 +12,7 @@ Install the required dependencies using npm: <br>
 ```npm install```
 
 ## Environment Configuration
-Before running the project, you need to set up the .env file with your API keys and other necessary configurations. Create a .env file in the root directory of the project and add the following:
+Before running the project, you need to set up the ```.env``` file with your API keys and other necessary configurations. Create a .env file in the root directory of the project and add the following:
 ```
 # MongoDB
 MONGODB_URI=<your-mongodb-uri>
