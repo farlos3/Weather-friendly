@@ -19,7 +19,7 @@ export async function GET(request) {
   
   // ตรวจสอบ timeRange: ค่า default คือ 'daily'
   const isHourly = timeRange === 'hourly';
-  const fields = 'tc,rh,slp,rain,ws10m,wd10m,cloudlow,cloudmed,cloudhigh,cond';
+  const fields = 'tc_max,tc_min,tc,rh,slp,rain,ws10m,wd10m,cloudlow,cloudmed,cloudhigh,cond';
   const duration = isHourly ? 7 : 7; // ถ้าเป็น hourly ใช้ duration 6, ถ้า daily ใช้ 12
 
   let url;

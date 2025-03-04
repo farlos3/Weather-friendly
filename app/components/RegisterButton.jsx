@@ -10,7 +10,7 @@ export default function RegisterButton() {
   };
 
   return (
-    <div className="flex space-x-2 z-10 items-center justify-end border w-max h-max">
+    <div className="flex space-x-2 z-10 items-center justify-end h-max">
       <img
         src="/img/Account-Icon.png"
         alt="Login"
